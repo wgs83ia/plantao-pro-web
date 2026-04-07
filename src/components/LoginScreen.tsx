@@ -31,11 +31,11 @@ const LoginScreen = ({ onGuestEnter }: { onGuestEnter: () => void }) => {
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-sm bg-white p-8 rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100 text-center"
       >
-        <div className="w-20 h-20 bg-primary-dark rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-primary-dark/30 overflow-hidden">
+        <div className="w-24 h-24 bg-transparent flex items-center justify-center mx-auto mb-6 overflow-visible">
           <img 
             src="/logo-plantao.png" 
             alt="Logo" 
-            className="w-full h-full object-contain p-2"
+            className="w-full h-full object-contain scale-[2.2] drop-shadow-[0_10px_25px_rgba(0,0,0,0.3)]"
             referrerPolicy="no-referrer"
           />
         </div>

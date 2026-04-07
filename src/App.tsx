@@ -233,11 +233,11 @@ const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user, is
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-20 h-20 flex items-center justify-center overflow-hidden">
+        <div className="w-32 h-20 flex items-center justify-center overflow-visible">
           <img 
             src="/logo-plantao.png" 
             alt="Logo Plantão Pro" 
-            className="w-full h-full object-contain pointer-events-auto cursor-pointer p-1"
+            className="w-full h-full object-contain pointer-events-auto cursor-pointer scale-[1.8] drop-shadow-[0_5px_15px_rgba(0,0,0,0.2)]"
             referrerPolicy="no-referrer"
             onClick={() => window.location.reload()}
           />
