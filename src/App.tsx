@@ -221,7 +221,7 @@ const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user }: 
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
           <img 
-            src="https://picsum.photos/seed/plantao-pro/200/200" 
+            src="https://storage.googleapis.com/static.mira.ai/agent_attachments/93604085-f559-4091-a675-8167520e7968/0/input_file_0.png" 
             alt="Logo Plantão Pro" 
             className="w-full h-full object-contain pointer-events-auto cursor-pointer"
             referrerPolicy="no-referrer"
@@ -2039,7 +2039,7 @@ export default function App() {
         {/* Background Logo */}
         <div className="fixed inset-0 pointer-events-none flex items-center justify-center opacity-[0.03] dark:opacity-[0.05] z-0">
           <img 
-            src="https://picsum.photos/seed/plantao-pro/500/500" 
+            src="https://storage.googleapis.com/static.mira.ai/agent_attachments/93604085-f559-4091-a675-8167520e7968/0/input_file_0.png" 
             alt="Logo Background" 
             className="w-[80%] max-w-[500px] object-contain"
             referrerPolicy="no-referrer"

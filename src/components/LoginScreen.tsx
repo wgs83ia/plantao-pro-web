@@ -33,7 +33,7 @@ const LoginScreen = ({ onGuestEnter }: { onGuestEnter: () => void }) => {
       >
         <div className="w-20 h-20 bg-primary-dark rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-primary-dark/30 overflow-hidden">
           <img 
-            src="https://picsum.photos/seed/plantao-pro/200/200" 
+            src="https://storage.googleapis.com/static.mira.ai/agent_attachments/93604085-f559-4091-a675-8167520e7968/0/input_file_0.png" 
             alt="Logo" 
             className="w-full h-full object-contain p-2"
             referrerPolicy="no-referrer"
