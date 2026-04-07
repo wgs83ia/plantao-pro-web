@@ -27,7 +27,10 @@ import {
   Map,
   Trash2,
   Edit,
-  FileText
+  FileText,
+  Wifi,
+  WifiOff,
+  RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Shift } from './types';
@@ -206,7 +209,7 @@ const MOCK_SHIFTS: Shift[] = [
 // --- Components ---
 
 
-const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user }: { title: string, showBack?: boolean, onBack?: () => void, onProfile?: () => void, onAnnual?: () => void, user: FirebaseUser | null }) => (
+const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user, isOffline, isSyncing }: { title: string, showBack?: boolean, onBack?: () => void, onProfile?: () => void, onAnnual?: () => void, user: FirebaseUser | null, isOffline?: boolean, isSyncing?: boolean }) => (
   <header className="sticky top-0 z-40 bg-white/90 dark:bg-dark/90 backdrop-blur-md border-b border-light/30 dark:border-secondary/20 shadow-md pt-safe">
     <div className="max-w-[900px] mx-auto flex justify-between items-center w-full px-4 h-16 relative">
       <div className="flex items-center gap-2 z-10">
@@ -215,13 +218,24 @@ const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user }: 
             <ArrowLeft size={22} className="text-primary dark:text-slate" />
           </button>
         )}
-        {!showBack && <h1 className="font-headline font-bold text-lg tracking-tight text-primary dark:text-white hidden sm:block">{title}</h1>}
+        {!showBack && (
+          <div className="flex items-center gap-2">
+            <h1 className="font-headline font-bold text-lg tracking-tight text-primary dark:text-white hidden sm:block">{title}</h1>
+            {isOffline ? (
+              <WifiOff size={14} className="text-red-500 animate-pulse" title="Offline - Usando dados locais" />
+            ) : isSyncing ? (
+              <RefreshCw size={14} className="text-blue-500 animate-spin" title="Sincronizando..." />
+            ) : (
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500" title="Sincronizado" />
+            )}
+          </div>
+        )}
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
           <img 
-            src="https://storage.googleapis.com/static.mira.ai/agent_attachments/93604085-f559-4091-a675-8167520e7968/0/input_file_0.png" 
+            src="/logo-plantao.png" 
             alt="Logo Plantão Pro" 
             className="w-full h-full object-contain pointer-events-auto cursor-pointer"
             referrerPolicy="no-referrer"
@@ -1642,6 +1656,20 @@ export default function App() {
   const [normalDayColor, setNormalDayColor] = useState('bg-primary');
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [firestoreLoaded, setFirestoreLoaded] = useState(false);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Lifted state for shifts with localStorage initialization
   const [selectedPattern, setSelectedPattern] = useState<'12X36' | '1X3' | '2X6' | 'custom'>(() => {
@@ -1803,9 +1831,11 @@ export default function App() {
         setIsGuest(false);
         // Carregar configurações do Firestore em tempo real
         const userDocRef = doc(db, 'users', user.uid);
-        unsubscribeProfile = onSnapshot(userDocRef, (snapshot) => {
+        unsubscribeProfile = onSnapshot(userDocRef, { includeMetadataChanges: true }, (snapshot) => {
+          setIsSyncing(snapshot.metadata.hasPendingWrites);
           if (snapshot.exists()) {
             const data = snapshot.data();
+            setFirestoreLoaded(true);
             if (data.settings) {
               const s = data.settings;
               if (s.darkMode !== undefined) setDarkMode(s.darkMode);
@@ -1886,8 +1916,11 @@ export default function App() {
 
   // Sincronizar configurações com Firestore quando mudarem
   useEffect(() => {
-    if (user && !loading) {
+    // Só sincronizar se o Firestore já tiver carregado pelo menos uma vez
+    // ou se o usuário estiver logado e não houver dados no Firestore ainda
+    if (user && !loading && firestoreLoaded) {
       const syncSettings = async () => {
+        setIsSyncing(true);
         try {
           await updateDoc(doc(db, 'users', user.uid), {
             settings: {
@@ -1907,7 +1940,12 @@ export default function App() {
             }
           });
         } catch (error) {
-          handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
+          // Se for erro de offline, o Firestore já cuidou de enfileirar
+          if (!(error instanceof Error && error.message.includes('offline'))) {
+            handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
+          }
+        } finally {
+          setIsSyncing(false);
         }
       };
       
@@ -1915,7 +1953,7 @@ export default function App() {
       return () => clearTimeout(timeoutId);
     }
   }, [
-    user, loading, darkMode, selectedPattern, anchorDate, normalDayColor, 
+    user, loading, firestoreLoaded, darkMode, selectedPattern, anchorDate, normalDayColor, 
     manualShifts, customWorkDays, customOffDays, hourlyRate, 
     notificationTime, notificationsEnabled, workplace, profession, extraLocations
   ]);
@@ -2039,7 +2077,7 @@ export default function App() {
         {/* Background Logo */}
         <div className="fixed inset-0 pointer-events-none flex items-center justify-center opacity-[0.03] dark:opacity-[0.05] z-0">
           <img 
-            src="https://storage.googleapis.com/static.mira.ai/agent_attachments/93604085-f559-4091-a675-8167520e7968/0/input_file_0.png" 
+            src="/logo-plantao.png" 
             alt="Logo Background" 
             className="w-[80%] max-w-[500px] object-contain"
             referrerPolicy="no-referrer"
@@ -2053,6 +2091,8 @@ export default function App() {
           onProfile={() => handleNavigate('profile')}
           onAnnual={() => handleNavigate('annual')}
           user={user}
+          isOffline={isOffline}
+          isSyncing={isSyncing}
         />
         
         <main className="max-w-[900px] mx-auto px-safe">
