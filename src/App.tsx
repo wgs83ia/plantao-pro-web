@@ -207,26 +207,30 @@ const MOCK_SHIFTS: Shift[] = [
 
 
 const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user }: { title: string, showBack?: boolean, onBack?: () => void, onProfile?: () => void, onAnnual?: () => void, user: FirebaseUser | null }) => (
-  <header className="sticky top-0 z-40 bg-white/80 dark:bg-dark/80 backdrop-blur-md border-b border-light/30 dark:border-secondary/20 shadow-sm pt-safe">
-    <div className="max-w-[900px] mx-auto flex justify-between items-center w-full px-4 py-3">
-      <div className="flex items-center gap-2">
-        {showBack ? (
+  <header className="sticky top-0 z-40 bg-white/90 dark:bg-dark/90 backdrop-blur-md border-b border-light/30 dark:border-secondary/20 shadow-md pt-safe">
+    <div className="max-w-[900px] mx-auto flex justify-between items-center w-full px-4 h-16 relative">
+      <div className="flex items-center gap-2 z-10">
+        {showBack && (
           <button onClick={onBack} className="p-2 hover:bg-light/50 dark:hover:bg-secondary/20 rounded-lg transition-colors">
             <ArrowLeft size={22} className="text-primary dark:text-slate" />
           </button>
-        ) : (
-          <div className="w-8 h-8 rounded-lg bg-primary-dark/10 dark:bg-warning/10 flex items-center justify-center overflow-hidden">
-            <img 
-              src="https://picsum.photos/seed/plantao-pro/100/100" 
-              alt="Logo" 
-              className="w-full h-full object-contain p-1"
-              referrerPolicy="no-referrer"
-            />
-          </div>
         )}
-        <h1 className="font-headline font-bold text-lg tracking-tight text-primary dark:text-white">{title}</h1>
+        {!showBack && <h1 className="font-headline font-bold text-lg tracking-tight text-primary dark:text-white hidden sm:block">{title}</h1>}
       </div>
-      <div className="flex items-center gap-2">
+
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
+          <img 
+            src="https://picsum.photos/seed/plantao-pro/200/200" 
+            alt="Logo Plantão Pro" 
+            className="w-full h-full object-contain pointer-events-auto cursor-pointer"
+            referrerPolicy="no-referrer"
+            onClick={() => window.location.reload()}
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 z-10">
         {!showBack && (
           <>
             <button 
