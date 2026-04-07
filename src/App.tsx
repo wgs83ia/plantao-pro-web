@@ -211,7 +211,7 @@ const MOCK_SHIFTS: Shift[] = [
 
 const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user, isOffline, isSyncing }: { title: string, showBack?: boolean, onBack?: () => void, onProfile?: () => void, onAnnual?: () => void, user: FirebaseUser | null, isOffline?: boolean, isSyncing?: boolean }) => (
   <header className="sticky top-0 z-40 bg-white/90 dark:bg-dark/90 backdrop-blur-md border-b border-light/30 dark:border-secondary/20 shadow-md pt-safe">
-    <div className="max-w-[900px] mx-auto flex justify-between items-center w-full px-4 h-16 relative">
+    <div className="max-w-[900px] mx-auto flex justify-between items-center w-full px-4 h-20 relative">
       <div className="flex items-center gap-2 z-10">
         {showBack && (
           <button onClick={onBack} className="p-2 hover:bg-light/50 dark:hover:bg-secondary/20 rounded-lg transition-colors">
@@ -233,11 +233,11 @@ const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user, is
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-12 h-12 flex items-center justify-center overflow-hidden">
+        <div className="w-20 h-20 flex items-center justify-center overflow-hidden">
           <img 
             src="/logo-plantao.png" 
             alt="Logo Plantão Pro" 
-            className="w-full h-full object-contain pointer-events-auto cursor-pointer"
+            className="w-full h-full object-contain pointer-events-auto cursor-pointer p-1"
             referrerPolicy="no-referrer"
             onClick={() => window.location.reload()}
           />
