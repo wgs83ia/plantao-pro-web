@@ -213,28 +213,25 @@ const MOCK_SHIFTS: Shift[] = [
 const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSyncing }: { title: string, showBack?: boolean, onBack?: () => void, onMenu?: () => void, user: FirebaseUser | null, isOffline?: boolean, isSyncing?: boolean }) => (
   <header className="sticky top-0 z-40 bg-white/90 dark:bg-dark/90 backdrop-blur-md border-b border-light/30 dark:border-secondary/20 shadow-md pt-safe">
     <div className="max-w-[900px] mx-auto flex justify-between items-center w-full px-4 h-20 relative">
-      <div className="flex items-center gap-2 z-10">
-        {showBack ? (
+      <div className="flex items-center gap-1 z-10">
+        <button onClick={onMenu} className="p-2 hover:bg-light/50 dark:hover:bg-secondary/20 rounded-lg transition-colors text-primary dark:text-slate">
+          <Menu size={24} />
+        </button>
+        {showBack && (
           <button onClick={onBack} className="p-2 hover:bg-light/50 dark:hover:bg-secondary/20 rounded-lg transition-colors">
             <ArrowLeft size={22} className="text-primary dark:text-slate" />
           </button>
-        ) : (
-          <button onClick={onMenu} className="p-2 hover:bg-light/50 dark:hover:bg-secondary/20 rounded-lg transition-colors text-primary dark:text-slate">
-            <Menu size={24} />
-          </button>
         )}
-        {!showBack && (
-          <div className="flex items-center gap-2">
-            <h1 className="font-headline font-bold text-lg tracking-tight text-primary dark:text-white hidden sm:block">{title}</h1>
-            {isOffline ? (
-              <WifiOff size={14} className="text-red-500 animate-pulse" title="Offline - Usando dados locais" />
-            ) : isSyncing ? (
-              <RefreshCw size={14} className="text-blue-500 animate-spin" title="Sincronizando..." />
-            ) : (
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500" title="Sincronizado" />
-            )}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <h1 className="font-headline font-bold text-lg tracking-tight text-primary dark:text-white hidden sm:block">{title}</h1>
+          {isOffline ? (
+            <WifiOff size={14} className="text-red-500 animate-pulse" title="Offline - Usando dados locais" />
+          ) : isSyncing ? (
+            <RefreshCw size={14} className="text-blue-500 animate-spin" title="Sincronizando..." />
+          ) : (
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500" title="Sincronizado" />
+          )}
+        </div>
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
