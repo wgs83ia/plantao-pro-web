@@ -1,0 +1,5 @@
+{
+  "name": "Plantão Pro",
+  "description": "Aplicativo de gestão de escalas e serviços para profissionais de segurança, com calendário operacional, visão anual e autenticação Google com perfil personalizado.",
+  "requestFramePermissions": []
+}

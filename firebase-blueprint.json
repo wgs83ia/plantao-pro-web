@@ -1,0 +1,37 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "Stores user profile information and settings.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique identifier for the user." },
+        "displayName": { "type": "string", "description": "The user's display name." },
+        "email": { "type": "string", "description": "The user's email address." },
+        "photoURL": { "type": "string", "description": "URL to the user's profile photo." },
+        "role": { "type": "string", "enum": ["officer", "admin"], "description": "The user's role in the system." },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "darkMode": { "type": "boolean" },
+            "selectedPattern": { "type": "string", "enum": ["2X4", "1X3", "2X6", "custom"] },
+            "anchorDate": { "type": "string", "format": "date-time" },
+            "extraDays": { "type": "array", "items": { "type": "string" } },
+            "customWorkDays": { "type": "integer" },
+            "customOffDays": { "type": "integer" },
+            "hourlyRate": { "type": "number" },
+            "notificationTime": { "type": "string", "enum": ["15m", "30m", "1h", "2h"] },
+            "notificationsEnabled": { "type": "boolean" }
+          }
+        }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "User profile document."
+    }
+  }
+}
