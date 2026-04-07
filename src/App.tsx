@@ -30,7 +30,8 @@ import {
   FileText,
   Wifi,
   WifiOff,
-  RefreshCw
+  RefreshCw,
+  Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Shift } from './types';
@@ -209,13 +210,17 @@ const MOCK_SHIFTS: Shift[] = [
 // --- Components ---
 
 
-const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user, isOffline, isSyncing }: { title: string, showBack?: boolean, onBack?: () => void, onProfile?: () => void, onAnnual?: () => void, user: FirebaseUser | null, isOffline?: boolean, isSyncing?: boolean }) => (
+const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSyncing }: { title: string, showBack?: boolean, onBack?: () => void, onMenu?: () => void, user: FirebaseUser | null, isOffline?: boolean, isSyncing?: boolean }) => (
   <header className="sticky top-0 z-40 bg-white/90 dark:bg-dark/90 backdrop-blur-md border-b border-light/30 dark:border-secondary/20 shadow-md pt-safe">
     <div className="max-w-[900px] mx-auto flex justify-between items-center w-full px-4 h-20 relative">
       <div className="flex items-center gap-2 z-10">
-        {showBack && (
+        {showBack ? (
           <button onClick={onBack} className="p-2 hover:bg-light/50 dark:hover:bg-secondary/20 rounded-lg transition-colors">
             <ArrowLeft size={22} className="text-primary dark:text-slate" />
+          </button>
+        ) : (
+          <button onClick={onMenu} className="p-2 hover:bg-light/50 dark:hover:bg-secondary/20 rounded-lg transition-colors text-primary dark:text-slate">
+            <Menu size={24} />
           </button>
         )}
         {!showBack && (
@@ -233,52 +238,92 @@ const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user, is
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-32 h-20 flex items-center justify-center overflow-visible">
+        <div className="w-28 h-16 flex items-center justify-center overflow-visible">
           <img 
             src="/logo-plantao.png" 
             alt="Logo Plantão Pro" 
-            className="w-full h-full object-contain pointer-events-auto cursor-pointer scale-[1.8] drop-shadow-[0_5px_15px_rgba(0,0,0,0.4)] contrast-[1.1] brightness-[1.05]"
+            className="w-full h-full object-contain pointer-events-auto cursor-pointer scale-[1.4] drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)] contrast-[1.1] brightness-[1.05]"
             referrerPolicy="no-referrer"
             onClick={() => window.location.reload()}
           />
         </div>
       </div>
 
-      <div className="flex items-center gap-2 z-10">
-        {!showBack && (
-          <>
-            <button 
-              onClick={onAnnual}
-              className="p-2 hover:bg-light/50 dark:hover:bg-secondary/20 rounded-lg transition-colors text-primary dark:text-slate"
-              title="Visão Anual"
-            >
-              <Calendar size={22} />
-            </button>
-            {user ? (
-              <button 
-                onClick={onProfile}
-                className="w-9 h-9 rounded-lg bg-light/30 dark:bg-secondary/20 overflow-hidden border border-light dark:border-secondary/30 hover:border-primary transition-all"
-              >
-                <img 
-                  src={user.photoURL || "https://picsum.photos/seed/officer/100/100"} 
-                  alt={user.displayName || "Oficial"} 
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              </button>
-            ) : (
-              <button 
-                onClick={onProfile}
-                className="px-4 py-2 rounded-lg bg-primary text-white text-[11px] font-black uppercase tracking-wider hover:bg-primary-dark transition-all active:scale-95 shadow-lg shadow-primary/20"
-              >
-                Entrar
-              </button>
-            )}
-          </>
-        )}
+      <div className="flex items-center gap-2 z-10 w-10">
+        {/* Espaçador para manter a logo centralizada */}
       </div>
     </div>
   </header>
+);
+
+const SideMenu = ({ isOpen, onClose, onProfile, onAnnual, user }: { isOpen: boolean, onClose: () => void, onProfile: () => void, onAnnual: () => void, user: FirebaseUser | null }) => (
+  <AnimatePresence>
+    {isOpen && (
+      <>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
+        />
+        <motion.div 
+          initial={{ x: '-100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '-100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="fixed top-0 left-0 bottom-0 w-[280px] z-[70] bg-white dark:bg-[#020617] shadow-2xl flex flex-col pt-safe"
+        >
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <img src="/logo-plantao.png" alt="Logo" className="w-8 h-8 object-contain" />
+              <span className="font-headline font-black text-xl text-primary tracking-tighter">Plantão Pro</span>
+            </div>
+            <button onClick={onClose} className="p-2 text-slate-400 hover:text-secondary">
+              <X size={24} />
+            </button>
+          </div>
+          
+          <div className="flex-1 p-4 space-y-2">
+            <button 
+              onClick={() => { onAnnual(); onClose(); }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-slate-700 dark:text-slate-200 font-bold"
+            >
+              <Calendar size={22} className="text-primary" />
+              <span>Visão Anual</span>
+            </button>
+            
+            <button 
+              onClick={() => { onProfile(); onClose(); }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-slate-700 dark:text-slate-200 font-bold"
+            >
+              <User size={22} className="text-primary" />
+              <span>Perfil e Configurações</span>
+            </button>
+          </div>
+          
+          <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+            <div className="flex items-center gap-3">
+              {user ? (
+                <>
+                  <img src={user.photoURL || "https://picsum.photos/seed/officer/100/100"} className="w-10 h-10 rounded-full border border-primary" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[150px]">{user.displayName}</span>
+                    <span className="text-[10px] text-slate-400 truncate max-w-[150px]">{user.email}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center gap-3 text-slate-400">
+                  <User size={24} />
+                  <span className="text-sm font-bold italic">Modo Visitante</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </>
+    )}
+  </AnimatePresence>
 );
 
 // --- Screens ---
@@ -1355,7 +1400,7 @@ const AddShiftScreen = ({
               </div>
             </div>
             <div className="grid grid-cols-7 gap-2 text-center text-[10px] text-slate-400 dark:text-slate-500 font-bold mb-2">
-              {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(d => <div key={d}>{d}</div>)}
+              {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => <div key={`${d}-${i}`}>{d}</div>)}
             </div>
             <div className="grid grid-cols-7 gap-2 text-center text-sm">
               {emptyDays.map(e => (
@@ -1500,8 +1545,8 @@ const AnnualView = ({
                 <span className="text-xs font-bold text-slate-300 dark:text-slate-600">{new Date().getFullYear()}</span>
               </div>
               <div className="grid grid-cols-7 gap-y-2 text-center">
-                {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(d => (
-                  <div key={d} className="text-[10px] font-bold text-slate-300 dark:text-slate-600 uppercase mb-1">{d}</div>
+                {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
+                  <div key={`${d}-${i}`} className="text-[10px] font-bold text-slate-300 dark:text-slate-600 uppercase mb-1">{d}</div>
                 ))}
                 {blanks.map(b => (
                   <div key={`blank-${b}`} className="aspect-square"></div>
@@ -1722,6 +1767,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : ['Setor Alfa', 'Base Operacional'];
   });
   const [selectedShiftForAlert, setSelectedShiftForAlert] = useState<{ date: string, location: string, startTime: string, endTime: string, type: string } | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Sincronizar com localStorage para funcionamento offline
   useEffect(() => {
@@ -2084,12 +2130,19 @@ export default function App() {
           />
         </div>
 
+        <SideMenu 
+          isOpen={isMenuOpen} 
+          onClose={() => setIsMenuOpen(false)} 
+          onProfile={() => handleNavigate('profile')}
+          onAnnual={() => handleNavigate('annual')}
+          user={user}
+        />
+
         <Header 
           title={getTitle()} 
           showBack={currentScreen !== 'calendar' && activeTab === 'shifts'} 
           onBack={() => handleNavigate('calendar')} 
-          onProfile={() => handleNavigate('profile')}
-          onAnnual={() => handleNavigate('annual')}
+          onMenu={() => setIsMenuOpen(true)}
           user={user}
           isOffline={isOffline}
           isSyncing={isSyncing}

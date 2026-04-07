@@ -295,7 +295,7 @@ const ProfileScreen = ({
                   <div className="pt-4">
                     <button 
                       onClick={handleSaveSettings}
-                      className="w-full bg-primary-dark dark:bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-primary-dark/20 active:scale-95 transition-all"
+                      className="w-full bg-gradient-to-r from-primary-dark to-secondary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-primary-dark/20 active:scale-95 transition-all"
                     >
                       Salvar Alterações
                     </button>
@@ -548,7 +548,7 @@ const ProfileScreen = ({
                 <div className="pt-4">
                   <button 
                     onClick={handleSaveSettings}
-                    className="w-full bg-primary-dark dark:bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-primary-dark/20 active:scale-95 transition-all"
+                    className="w-full bg-gradient-to-r from-primary-dark to-secondary text-white py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-primary-dark/20 active:scale-95 transition-all"
                   >
                     Salvar Alterações
                   </button>
