@@ -237,7 +237,7 @@ const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user, is
           <img 
             src="/logo-plantao.png" 
             alt="Logo Plantão Pro" 
-            className="w-full h-full object-contain pointer-events-auto cursor-pointer scale-[1.8] drop-shadow-[0_5px_15px_rgba(0,0,0,0.2)]"
+            className="w-full h-full object-contain pointer-events-auto cursor-pointer scale-[1.8] drop-shadow-[0_5px_15px_rgba(0,0,0,0.4)] contrast-[1.1] brightness-[1.05]"
             referrerPolicy="no-referrer"
             onClick={() => window.location.reload()}
           />
@@ -257,7 +257,7 @@ const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user, is
             {user ? (
               <button 
                 onClick={onProfile}
-                className="w-9 h-9 rounded-lg bg-light/30 dark:bg-secondary/20 overflow-hidden border border-light dark:border-secondary/30 hover:border-warning transition-all"
+                className="w-9 h-9 rounded-lg bg-light/30 dark:bg-secondary/20 overflow-hidden border border-light dark:border-secondary/30 hover:border-primary transition-all"
               >
                 <img 
                   src={user.photoURL || "https://picsum.photos/seed/officer/100/100"} 
@@ -269,7 +269,7 @@ const Header = ({ title, showBack = false, onBack, onProfile, onAnnual, user, is
             ) : (
               <button 
                 onClick={onProfile}
-                className="px-4 py-2 rounded-lg bg-primary dark:bg-blue-600 text-white text-[11px] font-black uppercase tracking-wider hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
+                className="px-4 py-2 rounded-lg bg-primary text-white text-[11px] font-black uppercase tracking-wider hover:bg-primary-dark transition-all active:scale-95 shadow-lg shadow-primary/20"
               >
                 Entrar
               </button>
@@ -507,8 +507,8 @@ const CalendarScreen = ({
               onClick={() => setSelectedPattern('12X36')}
               className={`flex-1 min-w-[70px] py-3 px-2 rounded-xl font-bold text-sm transition-all ${
                 selectedPattern === '12X36' 
-                  ? 'bg-gradient-to-br from-primary-dark to-primary text-white shadow-md' 
-                  : 'bg-white text-slate-600'
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' 
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800'
               }`}
             >
               12X36
@@ -517,8 +517,8 @@ const CalendarScreen = ({
               onClick={() => setSelectedPattern('1X3')}
               className={`flex-1 min-w-[70px] py-3 px-2 rounded-xl font-bold text-sm transition-all ${
                 selectedPattern === '1X3' 
-                  ? 'bg-gradient-to-br from-primary-dark to-primary text-white shadow-md' 
-                  : 'bg-white text-slate-600'
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' 
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800'
               }`}
             >
               1X3
@@ -527,8 +527,8 @@ const CalendarScreen = ({
               onClick={() => setSelectedPattern('2X6')}
               className={`flex-1 min-w-[70px] py-3 px-2 rounded-xl font-bold text-sm transition-all ${
                 selectedPattern === '2X6' 
-                  ? 'bg-gradient-to-br from-primary-dark to-primary text-white shadow-md' 
-                  : 'bg-white text-slate-600'
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' 
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800'
               }`}
             >
               2X6
@@ -549,14 +549,14 @@ const CalendarScreen = ({
           <div className="flex gap-2">
             <button 
               onClick={() => setIsCustomModalOpen(true)}
-              className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center gap-2`}
+              className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center gap-2 border border-transparent dark:border-slate-700`}
             >
               <Settings size={16} />
               Personalizar Escala
             </button>
             <button 
               onClick={() => setIsResetModalOpen(true)}
-              className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center gap-2`}
+              className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 flex items-center justify-center gap-2 border border-transparent dark:border-red-900/20`}
             >
               <Trash2 size={16} />
               Limpar Escala
@@ -727,7 +727,7 @@ const CalendarScreen = ({
             <ChevronLeft size={24} />
           </button>
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <h3 className="font-extrabold text-base text-dark dark:text-white tracking-tight">
+            <h3 className="font-extrabold text-base text-dark dark:text-primary tracking-tight">
               {months[currentMonth]} {currentYear}
             </h3>
           </div>

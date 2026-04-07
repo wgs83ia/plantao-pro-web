@@ -112,7 +112,7 @@ const ProfileScreen = ({
               <p className="text-slate-400 dark:text-slate-500 text-sm font-medium mb-6">Entre com sua conta para salvar dados na nuvem.</p>
               <button 
                 onClick={onSignIn}
-                className="bg-primary-dark dark:bg-blue-600 text-white px-8 py-3.5 rounded-2xl font-bold text-sm shadow-lg shadow-primary-dark/20 active:scale-95 transition-all"
+                className="bg-primary text-white px-8 py-3.5 rounded-2xl font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all"
               >
                 Fazer Login agora
               </button>

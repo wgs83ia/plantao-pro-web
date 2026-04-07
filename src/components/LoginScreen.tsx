@@ -35,13 +35,13 @@ const LoginScreen = ({ onGuestEnter }: { onGuestEnter: () => void }) => {
           <img 
             src="/logo-plantao.png" 
             alt="Logo" 
-            className="w-full h-full object-contain scale-[2.2] drop-shadow-[0_10px_25px_rgba(0,0,0,0.3)]"
+            className="w-full h-full object-contain scale-[2.2] drop-shadow-[0_10px_25px_rgba(0,0,0,0.5)] contrast-[1.1] brightness-[1.05]"
             referrerPolicy="no-referrer"
           />
         </div>
         
-        <h1 className="font-headline text-3xl font-black text-primary-dark mb-2 tracking-tighter">Plantão Pro</h1>
-        <p className="text-slate-400 text-sm mb-8 font-medium">Sua escala operacional em um só lugar.</p>
+        <h1 className="font-headline text-3xl font-black text-dark mb-2 tracking-tighter">Plantão Pro</h1>
+        <p className="text-slate-500 text-sm mb-8 font-medium">Sua escala operacional em um só lugar.</p>
         
         {error && (
           <motion.div 
