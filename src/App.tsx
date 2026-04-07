@@ -763,255 +763,261 @@ const CalendarScreen = ({
         )}
       </AnimatePresence>
 
-      <section className="space-y-6">
-        <div className="flex items-center justify-between relative h-10">
-          <button onClick={prevMonth} className="p-2 text-slate-400 hover:text-secondary transition-colors z-10">
-            <ChevronLeft size={24} />
-          </button>
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <h3 className="font-extrabold text-base text-dark dark:text-primary tracking-tight">
-              {months[currentMonth]} {currentYear}
-            </h3>
-          </div>
-          <button onClick={nextMonth} className="p-2 text-slate-400 hover:text-secondary transition-colors z-10">
-            <ChevronRight size={24} />
-          </button>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-3 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-visible">
-          <div className="grid grid-cols-7 text-center mb-3">
-            {weekDays.map(d => (
-              <span key={d} className="text-slate-400 dark:text-slate-500 font-bold text-[9px] uppercase tracking-widest">{d}</span>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-0.5">
-            {emptyDays.map(e => (
-              <div key={`empty-${e}`} className="aspect-square"></div>
-            ))}
-            {days.map(d => {
-              const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-              const hasShift = checkIsWorkday(d);
-              const manualShift = manualShifts[dateKey];
-              const isSelected = d === selectedDay;
-              const isAnchor = anchorDate && 
-                               anchorDate.getDate() === d && 
-                               anchorDate.getMonth() === currentMonth && 
-                               anchorDate.getFullYear() === currentYear;
-              
-              const isExtra = manualShift?.type === 'Extra';
-              const isFolga = manualShift?.type === 'Folga';
-              const isNormal = manualShift?.type === 'Normal' || (!manualShift && hasShift);
-              
-              let bgColor = '';
-              let textColor = 'text-slate-800 dark:text-slate-200';
-              
-              if (manualShift) {
-                if (isFolga) {
-                  bgColor = 'bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-200 dark:border-slate-700';
-                  textColor = 'text-slate-400 dark:text-slate-500';
-                } else {
-                  bgColor = manualShift.color || (isExtra ? 'bg-warning' : normalDayColor);
-                  textColor = 'text-white';
-                }
-              } else if (hasShift) {
-                bgColor = normalDayColor;
-                textColor = 'text-white';
-              }
-              
-              return (
-                <div 
-                  key={d} 
-                  onClick={() => handleDayClick(d)}
-                  className={`aspect-square flex flex-col items-center justify-center relative cursor-pointer transition-all hover:opacity-80 rounded-[1.5rem] ${bgColor} ${isSelected ? 'ring-2 ring-secondary ring-offset-2' : ''} ${isExtra ? 'shadow-sm shadow-warning/20' : ''}`}
-                >
-                  {/* Shift Type Indicators */}
-                  <div className="absolute top-1 left-1">
-                    {isExtra && (
-                      <div className="bg-white/20 p-0.5 rounded-md backdrop-blur-[2px]">
-                        <Plus size={7} strokeWidth={4} className="text-white" />
-                      </div>
-                    )}
-                    {isFolga && (
-                      <X size={9} strokeWidth={3} className="text-slate-300 dark:text-slate-600" />
-                    )}
-                    {isNormal && !manualShift && (
-                      <div className="w-1 h-1 rounded-full bg-white/40" />
-                    )}
-                  </div>
-
-                  <span className={`text-xl font-black ${textColor} ${isExtra ? '-translate-y-1.5' : ''}`}>{d}</span>
-                  
-                  {isExtra && (
-                    <div className="absolute bottom-1.5 w-full flex justify-center">
-                      <span className="text-[5px] font-black text-white/90 uppercase tracking-tighter bg-black/20 px-1 rounded-[2px] leading-none py-0.5">EXTRA</span>
-                    </div>
-                  )}
-
-                  {isAnchor && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 shadow-sm z-10" title="Início da Escala"></div>
-                  )}
-
-                  <AnimatePresence>
-                    {isDayOptionsOpen && isSelected && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 5, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="absolute bottom-[105%] left-1/2 -translate-x-1/2 z-[100] bg-white/98 dark:bg-slate-900/98 backdrop-blur-md rounded-2xl shadow-[0_10px_30px_-5px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-800/80 p-1.5 flex items-center gap-1.5 min-w-[160px]"
-                      >
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleEditDay(); }}
-                          className="flex flex-col items-center justify-center flex-1 h-11 bg-secondary text-white rounded-xl hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
-                        >
-                          <Edit size={14} />
-                          <span className="text-[8px] font-black mt-0.5 tracking-tighter">EDITAR</span>
-                        </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleDeleteDay(); }}
-                          className="flex flex-col items-center justify-center flex-1 h-11 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-xl border border-red-100/50 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all active:scale-95 shadow-sm"
-                        >
-                          <Trash2 size={14} />
-                          <span className="text-[8px] font-black mt-0.5 tracking-tighter">EXCLUIR</span>
-                        </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setIsDayOptionsOpen(false); }}
-                          className="flex flex-col items-center justify-center flex-1 h-11 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95"
-                        >
-                          <X size={14} />
-                          <span className="text-[8px] font-black mt-0.5 tracking-tighter">FECHAR</span>
-                        </button>
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[8px] border-transparent border-t-white/98 dark:border-t-slate-900/98"></div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-l-4 border-primary-dark shadow-sm space-y-4 border border-slate-100 dark:border-slate-800">
-          <div className="flex items-center justify-between">
-            <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Dia</h4>
-            <div className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
-              {selectedDay} {months[currentMonth]}
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex-1 w-full space-y-8">
+          <section className="space-y-6">
+            <div className="flex items-center justify-between relative h-10">
+              <button onClick={prevMonth} className="p-2 text-slate-400 hover:text-secondary transition-colors z-10">
+                <ChevronLeft size={24} />
+              </button>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <h3 className="font-extrabold text-base text-dark dark:text-primary tracking-tight">
+                  {months[currentMonth]} {currentYear}
+                </h3>
+              </div>
+              <button onClick={nextMonth} className="p-2 text-slate-400 hover:text-secondary transition-colors z-10">
+                <ChevronRight size={24} />
+              </button>
             </div>
-          </div>
-          
-          <div className="min-h-[80px] p-4 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/50">
-            {(() => {
-              const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
-              const manualShift = manualShifts[dateKey];
-              const isWorkday = checkIsWorkday(selectedDay);
-              
-              const type = manualShift ? manualShift.type : (isWorkday ? 'Normal' : 'Folga');
-              const info = manualShift?.info;
-              const start = manualShift?.start || (type === 'Normal' ? '07:00' : '');
-              const end = manualShift?.end || (type === 'Normal' ? '19:00' : '');
-              const location = manualShift?.location;
-              
-              return (
-                <div className="space-y-4 w-full">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className={`px-3 py-1.5 rounded-xl flex items-center gap-2 ${
-                      type === 'Normal' ? 'bg-primary/10 dark:bg-primary/20 text-secondary' : 
-                      type === 'Extra' ? 'bg-warning/10 dark:bg-warning/20 text-warning' : 
-                      'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                    }`}>
-                      <div className={`w-2 h-2 rounded-full ${type === 'Normal' ? normalDayColor : type === 'Extra' ? 'bg-warning' : 'bg-slate-400'}`}></div>
-                      <span className="text-[10px] font-black uppercase tracking-wider">{type}</span>
-                    </div>
 
-                    {(start && end) && (
-                      <div className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 flex items-center gap-2 shadow-sm">
-                        <Clock size={12} className="text-secondary" />
-                        <span className="text-[10px] font-bold tracking-tight">{start} - {end}</span>
-                      </div>
-                    )}
-
-                    {type === 'Extra' && location && (
-                      <div className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-warning flex items-center gap-2 shadow-sm">
-                        <MapPin size={12} />
-                        <span className="text-[10px] font-bold tracking-tight">{location}</span>
-                      </div>
-                    )}
-                  </div>
+            <div className="bg-white dark:bg-slate-900 p-3 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-visible">
+              <div className="grid grid-cols-7 text-center mb-3">
+                {weekDays.map(d => (
+                  <span key={d} className="text-slate-400 dark:text-slate-500 font-bold text-[9px] uppercase tracking-widest">{d}</span>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-0.5">
+                {emptyDays.map(e => (
+                  <div key={`empty-${e}`} className="aspect-square"></div>
+                ))}
+                {days.map(d => {
+                  const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                  const hasShift = checkIsWorkday(d);
+                  const manualShift = manualShifts[dateKey];
+                  const isSelected = d === selectedDay;
+                  const isAnchor = anchorDate && 
+                                   anchorDate.getDate() === d && 
+                                   anchorDate.getMonth() === currentMonth && 
+                                   anchorDate.getFullYear() === currentYear;
                   
-                  <div className="pt-3 border-t border-slate-200/50 dark:border-slate-700/50">
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 p-1.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
-                        <FileText size={14} className="text-slate-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Observações do Dia</p>
-                        {info ? (
-                          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                            {info}
-                          </p>
-                        ) : (
-                          <p className="text-xs text-slate-400 italic">Nenhuma observação registrada para este dia.</p>
+                  const isExtra = manualShift?.type === 'Extra';
+                  const isFolga = manualShift?.type === 'Folga';
+                  const isNormal = manualShift?.type === 'Normal' || (!manualShift && hasShift);
+                  
+                  let bgColor = '';
+                  let textColor = 'text-slate-800 dark:text-slate-200';
+                  
+                  if (manualShift) {
+                    if (isFolga) {
+                      bgColor = 'bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-200 dark:border-slate-700';
+                      textColor = 'text-slate-400 dark:text-slate-500';
+                    } else {
+                      bgColor = manualShift.color || (isExtra ? 'bg-warning' : normalDayColor);
+                      textColor = 'text-white';
+                    }
+                  } else if (hasShift) {
+                    bgColor = normalDayColor;
+                    textColor = 'text-white';
+                  }
+                  
+                  return (
+                    <div 
+                      key={d} 
+                      onClick={() => handleDayClick(d)}
+                      className={`aspect-square flex flex-col items-center justify-center relative cursor-pointer transition-all hover:opacity-80 rounded-[1.5rem] ${bgColor} ${isSelected ? 'ring-2 ring-secondary ring-offset-2' : ''} ${isExtra ? 'shadow-sm shadow-warning/20' : ''}`}
+                    >
+                      {/* Shift Type Indicators */}
+                      <div className="absolute top-1 left-1">
+                        {isExtra && (
+                          <div className="bg-white/20 p-0.5 rounded-md backdrop-blur-[2px]">
+                            <Plus size={7} strokeWidth={4} className="text-white" />
+                          </div>
+                        )}
+                        {isFolga && (
+                          <X size={9} strokeWidth={3} className="text-slate-300 dark:text-slate-600" />
+                        )}
+                        {isNormal && !manualShift && (
+                          <div className="w-1 h-1 rounded-full bg-white/40" />
                         )}
                       </div>
+
+                      <span className={`text-xl font-black ${textColor} ${isExtra ? '-translate-y-1.5' : ''}`}>{d}</span>
+                      
+                      {isExtra && (
+                        <div className="absolute bottom-1.5 w-full flex justify-center">
+                          <span className="text-[5px] font-black text-white/90 uppercase tracking-tighter bg-black/20 px-1 rounded-[2px] leading-none py-0.5">EXTRA</span>
+                        </div>
+                      )}
+
+                      {isAnchor && (
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 shadow-sm z-10" title="Início da Escala"></div>
+                      )}
+
+                      <AnimatePresence>
+                        {isDayOptionsOpen && isSelected && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="absolute bottom-[105%] left-1/2 -translate-x-1/2 z-[100] bg-white/98 dark:bg-slate-900/98 backdrop-blur-md rounded-2xl shadow-[0_10px_30px_-5px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-800/80 p-1.5 flex items-center gap-1.5 min-w-[160px]"
+                          >
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleEditDay(); }}
+                              className="flex flex-col items-center justify-center flex-1 h-11 bg-secondary text-white rounded-xl hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
+                            >
+                              <Edit size={14} />
+                              <span className="text-[8px] font-black mt-0.5 tracking-tighter">EDITAR</span>
+                            </button>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleDeleteDay(); }}
+                              className="flex flex-col items-center justify-center flex-1 h-11 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-xl border border-red-100/50 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all active:scale-95 shadow-sm"
+                            >
+                              <Trash2 size={14} />
+                              <span className="text-[8px] font-black mt-0.5 tracking-tighter">EXCLUIR</span>
+                            </button>
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); setIsDayOptionsOpen(false); }}
+                              className="flex flex-col items-center justify-center flex-1 h-11 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95"
+                            >
+                              <X size={14} />
+                              <span className="text-[8px] font-black mt-0.5 tracking-tighter">FECHAR</span>
+                            </button>
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-[8px] border-transparent border-t-white/98 dark:border-t-slate-900/98"></div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
-                  </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-l-4 border-primary-dark shadow-sm space-y-4 border border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Dia</h4>
+                <div className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                  {selectedDay} {months[currentMonth]}
                 </div>
-              );
-            })()}
-          </div>
-        </div>
-      </section>
+              </div>
+              
+              <div className="min-h-[80px] p-4 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/50">
+                {(() => {
+                  const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
+                  const manualShift = manualShifts[dateKey];
+                  const isWorkday = checkIsWorkday(selectedDay);
+                  
+                  const type = manualShift ? manualShift.type : (isWorkday ? 'Normal' : 'Folga');
+                  const info = manualShift?.info;
+                  const start = manualShift?.start || (type === 'Normal' ? '07:00' : '');
+                  const end = manualShift?.end || (type === 'Normal' ? '19:00' : '');
+                  const location = manualShift?.location;
+                  
+                  return (
+                    <div className="space-y-4 w-full">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className={`px-3 py-1.5 rounded-xl flex items-center gap-2 ${
+                          type === 'Normal' ? 'bg-primary/10 dark:bg-primary/20 text-secondary' : 
+                          type === 'Extra' ? 'bg-warning/10 dark:bg-warning/20 text-warning' : 
+                          'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                        }`}>
+                          <div className={`w-2 h-2 rounded-full ${type === 'Normal' ? normalDayColor : type === 'Extra' ? 'bg-warning' : 'bg-slate-400'}`}></div>
+                          <span className="text-[10px] font-black uppercase tracking-wider">{type}</span>
+                        </div>
 
-      <section className="space-y-4">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-l-4 border-secondary shadow-sm space-y-6 border border-slate-100 dark:border-slate-800">
-          <div className="text-center">
-            <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Mês</h4>
-          </div>
-          
-          <div className="space-y-4">
-            {(() => {
-              // Get all extra shifts for the current month
-              const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-              const monthExtras = Object.entries(manualShifts)
-                .filter(([date, shift]) => date.startsWith(monthPrefix) && shift.type === 'Extra')
-                .map(([date, shift]) => ({ date, ...shift }));
+                        {(start && end) && (
+                          <div className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 flex items-center gap-2 shadow-sm">
+                            <Clock size={12} className="text-secondary" />
+                            <span className="text-[10px] font-bold tracking-tight">{start} - {end}</span>
+                          </div>
+                        )}
 
-              if (monthExtras.length === 0) {
-                return (
-                  <p className="text-center text-slate-400 text-sm italic py-4">Nenhum serviço extra este mês</p>
-                );
-              }
-
-              return monthExtras.map((extra, idx) => {
-                const colorClass = extra.color || 'bg-warning';
-                const textColorClass = colorClass.replace('bg-', 'text-');
-                
-                return (
-                  <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-2 h-10 rounded-full ${colorClass}`}></div>
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Local</span>
-                        <p className={`text-sm font-black ${textColorClass}`}>
-                          {extra.location || 'Local não definido'}
-                        </p>
+                        {type === 'Extra' && location && (
+                          <div className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-warning flex items-center gap-2 shadow-sm">
+                            <MapPin size={12} />
+                            <span className="text-[10px] font-bold tracking-tight">{location}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="pt-3 border-t border-slate-200/50 dark:border-slate-700/50">
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 p-1.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <FileText size={14} className="text-slate-400" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Observações do Dia</p>
+                            {info ? (
+                              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                                {info}
+                              </p>
+                            ) : (
+                              <p className="text-xs text-slate-400 italic">Nenhuma observação registrada para este dia.</p>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right space-y-1">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Duração</span>
-                      <p className={`text-sm font-black ${textColorClass}`}>
-                        {extra.duration || '12h'}
-                      </p>
-                    </div>
-                  </div>
-                );
-              });
-            })()}
-          </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
+
+        <aside className="w-full lg:w-80 shrink-0 space-y-6">
+          <section className="space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-l-4 border-secondary shadow-sm space-y-6 border border-slate-100 dark:border-slate-800">
+              <div className="text-center">
+                <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Mês</h4>
+              </div>
+              
+              <div className="space-y-4">
+                {(() => {
+                  // Get all extra shifts for the current month
+                  const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+                  const monthExtras = Object.entries(manualShifts)
+                    .filter(([date, shift]) => date.startsWith(monthPrefix) && shift.type === 'Extra')
+                    .map(([date, shift]) => ({ date, ...shift }));
+
+                  if (monthExtras.length === 0) {
+                    return (
+                      <p className="text-center text-slate-400 text-sm italic py-4">Nenhum serviço extra este mês</p>
+                    );
+                  }
+
+                  return monthExtras.map((extra, idx) => {
+                    const colorClass = extra.color || 'bg-warning';
+                    const textColorClass = colorClass.replace('bg-', 'text-');
+                    
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-10 rounded-full ${colorClass}`}></div>
+                          <div className="space-y-1">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Local</span>
+                            <p className={`text-sm font-black ${textColorClass}`}>
+                              {extra.location || 'Local não definido'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right space-y-1">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Duração</span>
+                          <p className={`text-sm font-black ${textColorClass}`}>
+                            {extra.duration || '12h'}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
 
       <AnimatePresence>
         {isModalOpen && (
