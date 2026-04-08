@@ -212,18 +212,18 @@ const MOCK_SHIFTS: Shift[] = [
 
 const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSyncing }: { title: string, showBack?: boolean, onBack?: () => void, onMenu?: () => void, user: FirebaseUser | null, isOffline?: boolean, isSyncing?: boolean }) => (
   <header className="sticky top-0 z-40 bg-white dark:bg-dark border-b border-slate-200 dark:border-slate-800 shadow-sm pt-safe">
-    <div className="flex justify-between items-center w-full px-8 h-24">
-      <div className="flex items-center gap-4 z-10">
+    <div className="flex justify-between items-center w-full px-6 md:px-8 h-20 md:h-24">
+      <div className="flex items-center gap-2 md:gap-4 z-10">
         <button onClick={onMenu} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-600 dark:text-slate-400">
-          <Menu size={28} />
+          <Menu size={24} className="md:w-7 md:h-7" />
         </button>
         {showBack && (
           <button onClick={onBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-            <ArrowLeft size={26} className="text-slate-600 dark:text-slate-400" />
+            <ArrowLeft size={22} className="md:w-6 md:h-6 text-slate-600 dark:text-slate-400" />
           </button>
         )}
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 flex items-center justify-center">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="w-12 h-12 md:w-20 md:h-20 flex items-center justify-center">
             <img 
               src="/logo-plantao.png" 
               alt="Logo Plantão Pro" 
@@ -233,7 +233,7 @@ const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSy
             />
           </div>
           <div className="flex flex-col">
-            <h1 className="font-headline font-black text-xl tracking-tight text-slate-900 dark:text-white leading-none">PLANTÃO PRO</h1>
+            <h1 className="font-headline font-black text-lg md:text-xl tracking-tight text-slate-900 dark:text-white leading-none">PLANTÃO PRO</h1>
             <div className="flex items-center gap-2 mt-1">
               {isOffline ? (
                 <WifiOff size={12} className="text-red-500" />
@@ -540,34 +540,34 @@ const CalendarScreen = ({
     >
       <section className="space-y-4 mt-6">
         <h2 className="text-xs font-bold text-slate-400 tracking-widest uppercase">PREENCHIMENTO AUTOMÁTICO</h2>
-        <div className="space-y-3">
-          <div className="bg-slate-100 dark:bg-slate-800/50 p-1 rounded-2xl flex w-full border border-slate-200 dark:border-slate-700">
+        <div className="space-y-4">
+          <div className="bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl flex w-full border border-slate-200 dark:border-slate-700 shadow-inner">
             <button 
               onClick={() => setSelectedPattern('12X36')}
-              className={`flex-1 py-2.5 px-2 rounded-xl font-bold text-xs transition-all ${
+              className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
                 selectedPattern === '12X36' 
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
-                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
+                  ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
               12X36
             </button>
             <button 
               onClick={() => setSelectedPattern('1X3')}
-              className={`flex-1 py-2.5 px-2 rounded-xl font-bold text-xs transition-all ${
+              className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
                 selectedPattern === '1X3' 
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
-                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
+                  ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
               1X3
             </button>
             <button 
               onClick={() => setSelectedPattern('2X6')}
-              className={`flex-1 py-2.5 px-2 rounded-xl font-bold text-xs transition-all ${
+              className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
                 selectedPattern === '2X6' 
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
-                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
+                  ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
               2X6
@@ -575,10 +575,10 @@ const CalendarScreen = ({
             {hasCustomPattern && (
               <button 
                 onClick={() => setSelectedPattern('custom')}
-                className={`flex-1 py-2.5 px-2 rounded-xl font-bold text-xs transition-all ${
+                className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
                   selectedPattern === 'custom' 
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
+                    ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
               >
                 {customWorkDays}X{customOffDays}
@@ -900,7 +900,7 @@ const CalendarScreen = ({
                 </div>
               </div>
               
-              <div className="min-h-[100px] p-6 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/50">
+              <div className="min-h-[100px] p-8 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/50">
                 {(() => {
                   const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
                   const manualShift = manualShifts[dateKey];
@@ -990,7 +990,7 @@ const CalendarScreen = ({
                     const textColorClass = colorClass.replace('bg-', 'text-');
                     
                     return (
-                      <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                      <div key={idx} className="flex items-center justify-between p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                         <div className="flex items-center gap-3">
                           <div className={`w-2 h-10 rounded-full ${colorClass}`}></div>
                           <div className="space-y-1">
@@ -1307,7 +1307,7 @@ const AddShiftScreen = ({
       initial={{ opacity: 0, y: 100 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 100 }}
-      className="px-6 space-y-8 pb-40"
+      className="space-y-8 pb-40"
     >
       <div className="space-y-6 mt-6">
         <div className="space-y-2">
@@ -1435,7 +1435,7 @@ const AddShiftScreen = ({
       </div>
 
       <div className="fixed bottom-0 left-0 w-full bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 pb-safe z-50">
-        <div className="max-w-[900px] mx-auto px-6 pb-6 pt-4 flex gap-4">
+        <div className="max-w-[1200px] mx-auto px-6 pb-6 pt-4 flex gap-4">
           <button onClick={onCancel} className="flex-1 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold py-4 rounded-2xl transition-all active:scale-95">Cancelar</button>
           <button onClick={handleSave} className="flex-[2] bg-secondary text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-none transition-all active:scale-95">Salvar</button>
         </div>
@@ -2148,7 +2148,7 @@ export default function App() {
           isSyncing={isSyncing}
         />
         
-        <main className="max-w-[1200px] ml-8 mr-4 px-safe lg:ml-12">
+        <main className="max-w-[1200px] ml-0 md:ml-8 lg:ml-12 px-6 md:px-8 pt-4 md:pt-8">
           <AnimatePresence mode="wait">
             {renderScreen()}
           </AnimatePresence>
