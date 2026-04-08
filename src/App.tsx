@@ -538,72 +538,6 @@ const CalendarScreen = ({
       exit={{ opacity: 0, x: -20 }}
       className="space-y-8 pb-32"
     >
-      <section className="space-y-4 mt-6">
-        <h2 className="text-xs font-bold text-slate-400 tracking-widest uppercase">PREENCHIMENTO AUTOMÁTICO</h2>
-        <div className="space-y-4">
-          <div className="bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl flex w-full border border-slate-200 dark:border-slate-700 shadow-inner">
-            <button 
-              onClick={() => setSelectedPattern('12X36')}
-              className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
-                selectedPattern === '12X36' 
-                  ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              12X36
-            </button>
-            <button 
-              onClick={() => setSelectedPattern('1X3')}
-              className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
-                selectedPattern === '1X3' 
-                  ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              1X3
-            </button>
-            <button 
-              onClick={() => setSelectedPattern('2X6')}
-              className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
-                selectedPattern === '2X6' 
-                  ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              2X6
-            </button>
-            {hasCustomPattern && (
-              <button 
-                onClick={() => setSelectedPattern('custom')}
-                className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
-                  selectedPattern === 'custom' 
-                    ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                {customWorkDays}X{customOffDays}
-              </button>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <button 
-              onClick={() => setIsCustomModalOpen(true)}
-              className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center gap-2 border border-transparent dark:border-slate-700`}
-            >
-              <Settings size={16} />
-              Personalizar Escala
-            </button>
-            <button 
-              onClick={() => setIsResetModalOpen(true)}
-              className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 flex items-center justify-center gap-2 border border-transparent dark:border-red-900/20`}
-            >
-              <Trash2 size={16} />
-              Limpar Escala
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* Reset Scale Confirmation Modal */}
       <AnimatePresence>
         {isResetModalOpen && (
@@ -760,8 +694,199 @@ const CalendarScreen = ({
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
-        <div className="flex-1 w-full space-y-8">
+      <div className="flex flex-col lg:flex-row gap-8 items-start mt-6">
+        <aside className="w-full lg:w-96 shrink-0 space-y-8 order-2 lg:order-1">
+          {/* Preenchimento Automático */}
+          <section className="space-y-4">
+            <h2 className="text-xs font-bold text-slate-400 tracking-widest uppercase">PREENCHIMENTO AUTOMÁTICO</h2>
+            <div className="space-y-4">
+              <div className="bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl flex w-full border border-slate-200 dark:border-slate-700 shadow-inner">
+                <button 
+                  onClick={() => setSelectedPattern('12X36')}
+                  className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
+                    selectedPattern === '12X36' 
+                      ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  12X36
+                </button>
+                <button 
+                  onClick={() => setSelectedPattern('1X3')}
+                  className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
+                    selectedPattern === '1X3' 
+                      ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  1X3
+                </button>
+                <button 
+                  onClick={() => setSelectedPattern('2X6')}
+                  className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
+                    selectedPattern === '2X6' 
+                      ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
+                >
+                  2X6
+                </button>
+                {hasCustomPattern && (
+                  <button 
+                    onClick={() => setSelectedPattern('custom')}
+                    className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
+                      selectedPattern === 'custom' 
+                        ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    {customWorkDays}X{customOffDays}
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setIsCustomModalOpen(true)}
+                  className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center gap-2 border border-transparent dark:border-slate-700`}
+                >
+                  <Settings size={16} />
+                  Personalizar
+                </button>
+                <button 
+                  onClick={() => setIsResetModalOpen(true)}
+                  className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 flex items-center justify-center gap-2 border border-transparent dark:border-red-900/20`}
+                >
+                  <Trash2 size={16} />
+                  Limpar
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* Detalhes do Dia */}
+          <section className="space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-l-4 border-primary-dark shadow-sm space-y-6 border border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Dia</h4>
+                <div className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                  {selectedDay} {months[currentMonth]}
+                </div>
+              </div>
+              
+              <div className="min-h-[100px] p-8 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/50">
+                {(() => {
+                  const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
+                  const manualShift = manualShifts[dateKey];
+                  const isWorkday = checkIsWorkday(selectedDay);
+                  
+                  const type = manualShift ? manualShift.type : (isWorkday ? 'Normal' : 'Folga');
+                  const info = manualShift?.info;
+                  const start = manualShift?.start || (type === 'Normal' ? '07:00' : '');
+                  const end = manualShift?.end || (type === 'Normal' ? '19:00' : '');
+                  const location = manualShift?.location;
+                  
+                  return (
+                    <div className="space-y-4 w-full">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className={`px-3 py-1.5 rounded-xl flex items-center gap-2 ${
+                          type === 'Normal' ? 'bg-primary/10 dark:bg-primary/20 text-secondary' : 
+                          type === 'Extra' ? 'bg-warning/10 dark:bg-warning/20 text-warning' : 
+                          'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                        }`}>
+                          <div className={`w-2 h-2 rounded-full ${type === 'Normal' ? normalDayColor : type === 'Extra' ? 'bg-warning' : 'bg-slate-400'}`}></div>
+                          <span className="text-[10px] font-black uppercase tracking-wider">{type}</span>
+                        </div>
+
+                        {(start && end) && (
+                          <div className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 flex items-center gap-2 shadow-sm">
+                            <Clock size={12} className="text-secondary" />
+                            <span className="text-[10px] font-bold tracking-tight">{start} - {end}</span>
+                          </div>
+                        )}
+
+                        {type === 'Extra' && location && (
+                          <div className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-warning flex items-center gap-2 shadow-sm">
+                            <MapPin size={12} />
+                            <span className="text-[10px] font-bold tracking-tight">{location}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="pt-3 border-t border-slate-200/50 dark:border-slate-700/50">
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 p-1.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <FileText size={14} className="text-slate-400" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Observações</p>
+                            {info ? (
+                              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                                {info}
+                              </p>
+                            ) : (
+                              <p className="text-xs text-slate-400 italic">Nenhuma observação.</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </section>
+
+          {/* Detalhes do Mês */}
+          <section className="space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-l-4 border-secondary shadow-sm space-y-6 border border-slate-100 dark:border-slate-800">
+              <div className="text-center">
+                <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Mês</h4>
+              </div>
+              
+              <div className="space-y-4">
+                {(() => {
+                  const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+                  const monthExtras = Object.entries(manualShifts)
+                    .filter(([date, shift]) => date.startsWith(monthPrefix) && shift.type === 'Extra')
+                    .map(([date, shift]) => ({ date, ...shift }));
+
+                  if (monthExtras.length === 0) {
+                    return (
+                      <p className="text-center text-slate-400 text-sm italic py-4">Nenhum serviço extra este mês</p>
+                    );
+                  }
+
+                  return monthExtras.map((extra, idx) => {
+                    const colorClass = extra.color || 'bg-warning';
+                    const textColorClass = colorClass.replace('bg-', 'text-');
+                    
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-10 rounded-full ${colorClass}`}></div>
+                          <div className="space-y-1">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Local</span>
+                            <p className={`text-sm font-black ${textColorClass}`}>
+                              {extra.location || 'Local não definido'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right space-y-1">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Duração</span>
+                          <p className={`text-sm font-black ${textColorClass}`}>
+                            {extra.duration || '12h'}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+          </section>
+        </aside>
+
+        <div className="flex-1 w-full space-y-8 order-1 lg:order-2">
           <section className="space-y-6">
             <div className="flex items-center justify-between relative h-10">
               <button onClick={prevMonth} className="p-2 text-slate-400 hover:text-secondary transition-colors z-10">
@@ -890,130 +1015,7 @@ const CalendarScreen = ({
               </div>
             </div>
           </section>
-
-          <section className="space-y-4">
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-l-4 border-primary-dark shadow-sm space-y-6 border border-slate-100 dark:border-slate-800">
-              <div className="flex items-center justify-between">
-                <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Dia</h4>
-                <div className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
-                  {selectedDay} {months[currentMonth]}
-                </div>
-              </div>
-              
-              <div className="min-h-[100px] p-8 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/50">
-                {(() => {
-                  const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
-                  const manualShift = manualShifts[dateKey];
-                  const isWorkday = checkIsWorkday(selectedDay);
-                  
-                  const type = manualShift ? manualShift.type : (isWorkday ? 'Normal' : 'Folga');
-                  const info = manualShift?.info;
-                  const start = manualShift?.start || (type === 'Normal' ? '07:00' : '');
-                  const end = manualShift?.end || (type === 'Normal' ? '19:00' : '');
-                  const location = manualShift?.location;
-                  
-                  return (
-                    <div className="space-y-4 w-full">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <div className={`px-3 py-1.5 rounded-xl flex items-center gap-2 ${
-                          type === 'Normal' ? 'bg-primary/10 dark:bg-primary/20 text-secondary' : 
-                          type === 'Extra' ? 'bg-warning/10 dark:bg-warning/20 text-warning' : 
-                          'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                        }`}>
-                          <div className={`w-2 h-2 rounded-full ${type === 'Normal' ? normalDayColor : type === 'Extra' ? 'bg-warning' : 'bg-slate-400'}`}></div>
-                          <span className="text-[10px] font-black uppercase tracking-wider">{type}</span>
-                        </div>
-
-                        {(start && end) && (
-                          <div className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400 flex items-center gap-2 shadow-sm">
-                            <Clock size={12} className="text-secondary" />
-                            <span className="text-[10px] font-bold tracking-tight">{start} - {end}</span>
-                          </div>
-                        )}
-
-                        {type === 'Extra' && location && (
-                          <div className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-warning flex items-center gap-2 shadow-sm">
-                            <MapPin size={12} />
-                            <span className="text-[10px] font-bold tracking-tight">{location}</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="pt-3 border-t border-slate-200/50 dark:border-slate-700/50">
-                        <div className="flex items-start gap-3">
-                          <div className="mt-0.5 p-1.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">
-                            <FileText size={14} className="text-slate-400" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Observações do Dia</p>
-                            {info ? (
-                              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                                {info}
-                              </p>
-                            ) : (
-                              <p className="text-xs text-slate-400 italic">Nenhuma observação registrada para este dia.</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            </div>
-          </section>
         </div>
-
-        <aside className="w-full lg:w-80 shrink-0 space-y-6">
-          <section className="space-y-4">
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-l-4 border-secondary shadow-sm space-y-6 border border-slate-100 dark:border-slate-800">
-              <div className="text-center">
-                <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Mês</h4>
-              </div>
-              
-              <div className="space-y-4">
-                {(() => {
-                  // Get all extra shifts for the current month
-                  const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-                  const monthExtras = Object.entries(manualShifts)
-                    .filter(([date, shift]) => date.startsWith(monthPrefix) && shift.type === 'Extra')
-                    .map(([date, shift]) => ({ date, ...shift }));
-
-                  if (monthExtras.length === 0) {
-                    return (
-                      <p className="text-center text-slate-400 text-sm italic py-4">Nenhum serviço extra este mês</p>
-                    );
-                  }
-
-                  return monthExtras.map((extra, idx) => {
-                    const colorClass = extra.color || 'bg-warning';
-                    const textColorClass = colorClass.replace('bg-', 'text-');
-                    
-                    return (
-                      <div key={idx} className="flex items-center justify-between p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-2 h-10 rounded-full ${colorClass}`}></div>
-                          <div className="space-y-1">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Local</span>
-                            <p className={`text-sm font-black ${textColorClass}`}>
-                              {extra.location || 'Local não definido'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right space-y-1">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Duração</span>
-                          <p className={`text-sm font-black ${textColorClass}`}>
-                            {extra.duration || '12h'}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  });
-                })()}
-              </div>
-            </div>
-          </section>
-        </aside>
       </div>
 
       <AnimatePresence>
