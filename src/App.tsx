@@ -211,43 +211,41 @@ const MOCK_SHIFTS: Shift[] = [
 
 
 const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSyncing }: { title: string, showBack?: boolean, onBack?: () => void, onMenu?: () => void, user: FirebaseUser | null, isOffline?: boolean, isSyncing?: boolean }) => (
-  <header className="sticky top-0 z-40 bg-white/90 dark:bg-dark/90 backdrop-blur-md border-b border-light/30 dark:border-secondary/20 shadow-md pt-safe">
-    <div className="max-w-[900px] mx-auto flex justify-between items-center w-full px-4 h-20 relative">
-      <div className="flex items-center gap-1 z-10">
-        <button onClick={onMenu} className="p-2 hover:bg-light/50 dark:hover:bg-secondary/20 rounded-lg transition-colors text-primary dark:text-slate">
+  <header className="sticky top-0 z-40 bg-white dark:bg-dark border-b border-slate-200 dark:border-slate-800 shadow-sm pt-safe">
+    <div className="max-w-[900px] mx-auto flex justify-between items-center w-full px-4 h-20">
+      <div className="flex items-center gap-3 z-10">
+        <button onClick={onMenu} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-600 dark:text-slate-400">
           <Menu size={24} />
         </button>
         {showBack && (
-          <button onClick={onBack} className="p-2 hover:bg-light/50 dark:hover:bg-secondary/20 rounded-lg transition-colors">
-            <ArrowLeft size={22} className="text-primary dark:text-slate" />
+          <button onClick={onBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+            <ArrowLeft size={22} className="text-slate-600 dark:text-slate-400" />
           </button>
         )}
-        <div className="flex items-center gap-2">
-          <h1 className="font-headline font-bold text-lg tracking-tight text-primary dark:text-white hidden sm:block">{title}</h1>
-          {isOffline ? (
-            <WifiOff size={14} className="text-red-500 animate-pulse" title="Offline - Usando dados locais" />
-          ) : isSyncing ? (
-            <RefreshCw size={14} className="text-blue-500 animate-spin" title="Sincronizando..." />
-          ) : (
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500" title="Sincronizado" />
-          )}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 flex items-center justify-center">
+            <img 
+              src="/logo-plantao.png" 
+              alt="Logo Plantão Pro" 
+              className="w-full h-full object-contain contrast-[1.1] brightness-[1.05]"
+              referrerPolicy="no-referrer"
+              onClick={() => window.location.reload()}
+            />
+          </div>
+          <div className="flex flex-col">
+            <h1 className="font-headline font-black text-base tracking-tight text-slate-900 dark:text-white leading-none">PLANTÃO PRO</h1>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{title}</span>
+              {isOffline ? (
+                <WifiOff size={10} className="text-red-500" />
+              ) : isSyncing ? (
+                <RefreshCw size={10} className="text-blue-500 animate-spin" />
+              ) : (
+                <div className="w-1 h-1 rounded-full bg-green-500" />
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-28 h-16 flex items-center justify-center overflow-visible">
-          <img 
-            src="/logo-plantao.png" 
-            alt="Logo Plantão Pro" 
-            className="w-full h-full object-contain pointer-events-auto cursor-pointer scale-[1.4] drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)] contrast-[1.1] brightness-[1.05]"
-            referrerPolicy="no-referrer"
-            onClick={() => window.location.reload()}
-          />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 z-10 w-10">
-        {/* Espaçador para manter a logo centralizada */}
       </div>
     </div>
   </header>
@@ -543,34 +541,34 @@ const CalendarScreen = ({
     >
       <section className="space-y-4 mt-6">
         <h2 className="text-xs font-bold text-slate-400 tracking-widest uppercase">PREENCHIMENTO AUTOMÁTICO</h2>
-        <div className="space-y-2">
-          <div className="bg-slate-100 p-2 rounded-2xl flex flex-wrap gap-2">
+        <div className="space-y-3">
+          <div className="bg-slate-100 dark:bg-slate-800/50 p-1 rounded-2xl flex w-full border border-slate-200 dark:border-slate-700">
             <button 
               onClick={() => setSelectedPattern('12X36')}
-              className={`flex-1 min-w-[70px] py-3 px-2 rounded-xl font-bold text-sm transition-all ${
+              className={`flex-1 py-2.5 px-2 rounded-xl font-bold text-xs transition-all ${
                 selectedPattern === '12X36' 
-                  ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' 
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
               }`}
             >
               12X36
             </button>
             <button 
               onClick={() => setSelectedPattern('1X3')}
-              className={`flex-1 min-w-[70px] py-3 px-2 rounded-xl font-bold text-sm transition-all ${
+              className={`flex-1 py-2.5 px-2 rounded-xl font-bold text-xs transition-all ${
                 selectedPattern === '1X3' 
-                  ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' 
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
               }`}
             >
               1X3
             </button>
             <button 
               onClick={() => setSelectedPattern('2X6')}
-              className={`flex-1 min-w-[70px] py-3 px-2 rounded-xl font-bold text-sm transition-all ${
+              className={`flex-1 py-2.5 px-2 rounded-xl font-bold text-xs transition-all ${
                 selectedPattern === '2X6' 
-                  ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' 
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-800'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
               }`}
             >
               2X6
@@ -578,10 +576,10 @@ const CalendarScreen = ({
             {hasCustomPattern && (
               <button 
                 onClick={() => setSelectedPattern('custom')}
-                className={`flex-1 min-w-[70px] py-3 px-2 rounded-xl font-bold text-sm transition-all ${
+                className={`flex-1 py-2.5 px-2 rounded-xl font-bold text-xs transition-all ${
                   selectedPattern === 'custom' 
-                    ? 'bg-gradient-to-br from-primary-dark to-primary text-white shadow-md' 
-                    : 'bg-white text-slate-600'
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
                 }`}
               >
                 {customWorkDays}X{customOffDays}
@@ -895,15 +893,15 @@ const CalendarScreen = ({
           </section>
 
           <section className="space-y-4">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-l-4 border-primary-dark shadow-sm space-y-4 border border-slate-100 dark:border-slate-800">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-l-4 border-primary-dark shadow-sm space-y-6 border border-slate-100 dark:border-slate-800">
               <div className="flex items-center justify-between">
                 <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Dia</h4>
-                <div className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                <div className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
                   {selectedDay} {months[currentMonth]}
                 </div>
               </div>
               
-              <div className="min-h-[80px] p-4 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/50">
+              <div className="min-h-[100px] p-6 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/50">
                 {(() => {
                   const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
                   const manualShift = manualShifts[dateKey];
@@ -969,7 +967,7 @@ const CalendarScreen = ({
 
         <aside className="w-full lg:w-80 shrink-0 space-y-6">
           <section className="space-y-4">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border-l-4 border-secondary shadow-sm space-y-6 border border-slate-100 dark:border-slate-800">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-l-4 border-secondary shadow-sm space-y-6 border border-slate-100 dark:border-slate-800">
               <div className="text-center">
                 <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Mês</h4>
               </div>
