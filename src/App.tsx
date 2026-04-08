@@ -212,18 +212,18 @@ const MOCK_SHIFTS: Shift[] = [
 
 const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSyncing }: { title: string, showBack?: boolean, onBack?: () => void, onMenu?: () => void, user: FirebaseUser | null, isOffline?: boolean, isSyncing?: boolean }) => (
   <header className="sticky top-0 z-40 bg-white dark:bg-dark border-b border-slate-200 dark:border-slate-800 shadow-sm pt-safe">
-    <div className="max-w-[900px] mx-auto flex justify-between items-center w-full px-4 h-20">
-      <div className="flex items-center gap-3 z-10">
+    <div className="flex justify-between items-center w-full px-8 h-24">
+      <div className="flex items-center gap-4 z-10">
         <button onClick={onMenu} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-600 dark:text-slate-400">
-          <Menu size={24} />
+          <Menu size={28} />
         </button>
         {showBack && (
           <button onClick={onBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-            <ArrowLeft size={22} className="text-slate-600 dark:text-slate-400" />
+            <ArrowLeft size={26} className="text-slate-600 dark:text-slate-400" />
           </button>
         )}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 flex items-center justify-center">
+        <div className="flex items-center gap-4">
+          <div className="w-20 h-20 flex items-center justify-center">
             <img 
               src="/logo-plantao.png" 
               alt="Logo Plantão Pro" 
@@ -233,15 +233,14 @@ const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSy
             />
           </div>
           <div className="flex flex-col">
-            <h1 className="font-headline font-black text-base tracking-tight text-slate-900 dark:text-white leading-none">PLANTÃO PRO</h1>
+            <h1 className="font-headline font-black text-xl tracking-tight text-slate-900 dark:text-white leading-none">PLANTÃO PRO</h1>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{title}</span>
               {isOffline ? (
-                <WifiOff size={10} className="text-red-500" />
+                <WifiOff size={12} className="text-red-500" />
               ) : isSyncing ? (
-                <RefreshCw size={10} className="text-blue-500 animate-spin" />
+                <RefreshCw size={12} className="text-blue-500 animate-spin" />
               ) : (
-                <div className="w-1 h-1 rounded-full bg-green-500" />
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
               )}
             </div>
           </div>
@@ -537,7 +536,7 @@ const CalendarScreen = ({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="px-6 space-y-8 pb-32"
+      className="space-y-8 pb-32"
     >
       <section className="space-y-4 mt-6">
         <h2 className="text-xs font-bold text-slate-400 tracking-widest uppercase">PREENCHIMENTO AUTOMÁTICO</h2>
@@ -1503,7 +1502,7 @@ const AnnualView = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="px-6 space-y-8 pb-32"
+      className="space-y-8 pb-32"
     >
       <section className="mt-8">
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-6">Visão Anual {currentYear}</h1>
@@ -2149,7 +2148,7 @@ export default function App() {
           isSyncing={isSyncing}
         />
         
-        <main className="max-w-[900px] mx-auto px-safe">
+        <main className="max-w-[1200px] ml-8 mr-4 px-safe lg:ml-12">
           <AnimatePresence mode="wait">
             {renderScreen()}
           </AnimatePresence>

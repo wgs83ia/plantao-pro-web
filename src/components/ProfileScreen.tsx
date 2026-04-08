@@ -100,7 +100,7 @@ const ProfileScreen = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="space-y-8 pb-32 px-6 pt-4"
+          className="space-y-8 pb-32 pt-4"
         >
           <div className="bg-white dark:bg-slate-950 p-8 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100 dark:border-slate-900 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-900 dark:to-slate-800 opacity-10"></div>
@@ -314,7 +314,7 @@ const ProfileScreen = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="space-y-8 pb-32 px-6 pt-4"
+      className="space-y-8 pb-32 pt-4"
     >
       {/* Profile Card */}
       <div className="bg-white dark:bg-slate-950 p-8 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100 dark:border-slate-900 text-center relative overflow-hidden">
