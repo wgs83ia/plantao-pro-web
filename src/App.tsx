@@ -922,7 +922,19 @@ const CalendarScreen = ({
                     );
                   }
 
-                  return monthExtras.map((extra, idx) => {
+                  // Group by location and color to avoid repetitions
+                  const uniqueExtras = monthExtras.reduce((acc, current) => {
+                    const location = current.location || 'Local não definido';
+                    const color = current.color || 'bg-warning';
+                    const key = `${location}-${color}`;
+                    
+                    if (!acc.find(item => `${item.location || 'Local não definido'}-${item.color || 'bg-warning'}` === key)) {
+                      acc.push(current);
+                    }
+                    return acc;
+                  }, [] as typeof monthExtras);
+
+                  return uniqueExtras.map((extra, idx) => {
                     const colorClass = extra.color || 'bg-warning';
                     const textColorClass = colorClass.replace('bg-', 'text-');
                     
