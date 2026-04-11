@@ -41,6 +41,72 @@ import { getDoc, setDoc, updateDoc, doc, onSnapshot } from 'firebase/firestore';
 import LoginScreen from './components/LoginScreen';
 import ProfileScreen from './components/ProfileScreen';
 
+// --- Brazilian Holidays Helper ---
+const getBrazilianHolidays = (year: number, month: number) => {
+  const holidays: { day: number, name: string }[] = [];
+  
+  // Static holidays (month is 0-indexed)
+  const staticHolidays: Record<string, string> = {
+    '0-1': 'Confraternização Universal',
+    '3-21': 'Tiradentes',
+    '4-1': 'Dia do Trabalhador',
+    '8-7': 'Independência do Brasil',
+    '9-12': 'Nossa Senhora Aparecida',
+    '10-2': 'Finados',
+    '10-15': 'Proclamação da República',
+    '10-20': 'Dia da Consciência Negra',
+    '11-25': 'Natal'
+  };
+
+  Object.entries(staticHolidays).forEach(([mDay, name]) => {
+    const [m, d] = mDay.split('-').map(Number);
+    if (m === month) {
+      holidays.push({ day: d, name });
+    }
+  });
+
+  // Mobile holidays (Easter based)
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const monthEaster = Math.floor((h + l - 7 * m + 114) / 31);
+  const dayEaster = ((h + l - 7 * m + 114) % 31) + 1;
+  
+  const easterDate = new Date(year, monthEaster - 1, dayEaster);
+  
+  const addHoliday = (date: Date, name: string) => {
+    if (date.getMonth() === month) {
+      holidays.push({ day: date.getDate(), name });
+    }
+  };
+
+  // Carnaval: 47 days before Easter
+  const carnaval = new Date(easterDate);
+  carnaval.setDate(easterDate.getDate() - 47);
+  addHoliday(carnaval, 'Carnaval');
+
+  // Sexta-feira Santa: 2 days before Easter
+  const sextaSanta = new Date(easterDate);
+  sextaSanta.setDate(easterDate.getDate() - 2);
+  addHoliday(sextaSanta, 'Sexta-feira Santa');
+
+  // Corpus Christi: 60 days after Easter
+  const corpusChristi = new Date(easterDate);
+  corpusChristi.setDate(easterDate.getDate() + 60);
+  addHoliday(corpusChristi, 'Corpus Christi');
+
+  return holidays.sort((a, b) => a.day - b.day);
+};
+
 // --- Firestore Error Handling ---
 enum OperationType {
   CREATE = 'create',
@@ -888,132 +954,172 @@ const CalendarScreen = ({
 
         <div className="flex-1 w-full space-y-8 order-1 lg:order-2">
           <section className="space-y-6">
-            <div className="flex items-center justify-between relative h-10">
-              <button onClick={prevMonth} className="p-2 text-slate-400 hover:text-secondary transition-colors z-10">
+            <div className="flex items-center justify-between relative h-12 mb-4">
+              <button 
+                onClick={prevMonth} 
+                className="w-11 h-11 flex items-center justify-center text-slate-400 hover:text-secondary transition-colors z-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
                 <ChevronLeft size={24} />
               </button>
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <h3 className="font-extrabold text-base text-dark dark:text-primary tracking-tight">
+                <h3 className="font-bold text-lg text-[#F59E0B] tracking-tight">
                   {months[currentMonth]} {currentYear}
                 </h3>
               </div>
-              <button onClick={nextMonth} className="p-2 text-slate-400 hover:text-secondary transition-colors z-10">
+              <button 
+                onClick={nextMonth} 
+                className="w-11 h-11 flex items-center justify-center text-slate-400 hover:text-secondary transition-colors z-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
                 <ChevronRight size={24} />
               </button>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-3 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-visible">
-              <div className="grid grid-cols-7 text-center mb-3">
-                {weekDays.map(d => (
-                  <span key={d} className="text-slate-400 dark:text-slate-500 font-bold text-[9px] uppercase tracking-widest">{d}</span>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-0.5">
-                {emptyDays.map(e => (
-                  <div key={`empty-${e}`} className="aspect-square"></div>
-                ))}
-                {days.map(d => {
-                  const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                  const hasShift = checkIsWorkday(d);
-                  const manualShift = manualShifts[dateKey];
-                  const isSelected = d === selectedDay;
-                  const isAnchor = anchorDate && 
-                                   anchorDate.getDate() === d && 
-                                   anchorDate.getMonth() === currentMonth && 
-                                   anchorDate.getFullYear() === currentYear;
-                  
-                  const isExtra = manualShift?.type === 'Extra';
-                  const isFolga = manualShift?.type === 'Folga';
-                  const isNormal = manualShift?.type === 'Normal' || (!manualShift && hasShift);
-                  
-                  let bgColor = '';
-                  let textColor = 'text-slate-800 dark:text-slate-200';
-                  
-                  if (manualShift) {
-                    if (isFolga) {
-                      bgColor = 'bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-200 dark:border-slate-700';
-                      textColor = 'text-slate-400 dark:text-slate-500';
-                    } else {
-                      bgColor = manualShift.color || (isExtra ? 'bg-warning' : normalDayColor);
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${currentMonth}-${currentYear}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white dark:bg-slate-900 p-4 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-visible"
+              >
+                <div className="grid grid-cols-7 text-center mb-2">
+                  {weekDays.map(d => (
+                    <span key={d} className="text-[#94A3B8] font-bold text-[10px] uppercase tracking-[0.1em]">{d}</span>
+                  ))}
+                </div>
+                <div className="grid grid-cols-7 gap-[6px]">
+                  {emptyDays.map(e => (
+                    <div key={`empty-${e}`} className="aspect-square"></div>
+                  ))}
+                  {days.map(d => {
+                    const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const hasShift = checkIsWorkday(d);
+                    const manualShift = manualShifts[dateKey];
+                    const isSelected = d === selectedDay;
+                    const isToday = now.getDate() === d && now.getMonth() === currentMonth && now.getFullYear() === currentYear;
+                    const isAnchor = anchorDate && 
+                                     anchorDate.getDate() === d && 
+                                     anchorDate.getMonth() === currentMonth && 
+                                     anchorDate.getFullYear() === currentYear;
+                    
+                    const isExtra = manualShift?.type === 'Extra';
+                    const isFolga = manualShift?.type === 'Folga';
+                    const isNormal = manualShift?.type === 'Normal' || (!manualShift && hasShift);
+                    
+                    let bgColor = '';
+                    let textColor = 'text-slate-400 dark:text-slate-500';
+                    
+                    if (manualShift) {
+                      if (isFolga) {
+                        bgColor = 'bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-200 dark:border-slate-700';
+                        textColor = 'text-slate-400 dark:text-slate-500';
+                      } else {
+                        bgColor = manualShift.color || (isExtra ? 'bg-warning' : normalDayColor);
+                        textColor = 'text-white';
+                      }
+                    } else if (hasShift) {
+                      bgColor = normalDayColor;
                       textColor = 'text-white';
                     }
-                  } else if (hasShift) {
-                    bgColor = normalDayColor;
-                    textColor = 'text-white';
-                  }
-                  
-                  return (
-                    <div 
-                      key={d} 
-                      onClick={() => handleDayClick(d)}
-                      className={`aspect-square flex flex-col items-center justify-center relative cursor-pointer transition-all hover:opacity-80 rounded-[1.5rem] ${bgColor} ${isSelected ? 'ring-2 ring-secondary ring-offset-2' : ''} ${isExtra ? 'shadow-sm shadow-warning/20' : ''}`}
-                    >
-                      {/* Shift Type Indicators */}
-                      <div className="absolute top-1 left-1">
+
+                    if (isToday && !bgColor) {
+                      bgColor = 'bg-slate-100 dark:bg-slate-800';
+                      textColor = 'text-slate-900 dark:text-white';
+                    }
+                    
+                    return (
+                      <div 
+                        key={d} 
+                        onClick={() => handleDayClick(d)}
+                        className={`aspect-square flex flex-col items-center justify-center relative cursor-pointer transition-all hover:opacity-80 rounded-full ${bgColor} ${isSelected ? 'ring-2 ring-secondary ring-offset-2' : ''} ${isToday ? 'ring-2 ring-white dark:ring-slate-900 ring-offset-2 outline outline-2 outline-white dark:outline-slate-700' : ''} ${isExtra ? 'shadow-sm shadow-warning/20' : ''}`}
+                      >
+                        {/* Shift Type Indicators */}
+                        <div className="absolute top-1 left-1">
+                          {isExtra && (
+                            <div className="bg-white/20 p-0.5 rounded-md backdrop-blur-[2px]">
+                              <Plus size={7} strokeWidth={4} className="text-white" />
+                            </div>
+                          )}
+                          {isFolga && (
+                            <X size={9} strokeWidth={3} className="text-slate-300 dark:text-slate-600" />
+                          )}
+                          {isNormal && !manualShift && (
+                            <div className="w-1 h-1 rounded-full bg-white/40" />
+                          )}
+                        </div>
+
+                        <span className={`text-[17px] font-bold ${textColor} ${isExtra ? '-translate-y-1.5' : ''}`}>{d}</span>
+                        
                         {isExtra && (
-                          <div className="bg-white/20 p-0.5 rounded-md backdrop-blur-[2px]">
-                            <Plus size={7} strokeWidth={4} className="text-white" />
+                          <div className="absolute bottom-2 w-full flex justify-center">
+                            <span className="text-[8px] font-bold text-white/90 uppercase tracking-[0.05em]">EXTRA</span>
                           </div>
                         )}
-                        {isFolga && (
-                          <X size={9} strokeWidth={3} className="text-slate-300 dark:text-slate-600" />
+
+                        {isAnchor && (
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 shadow-sm z-10" title="Início da Escala"></div>
                         )}
-                        {isNormal && !manualShift && (
-                          <div className="w-1 h-1 rounded-full bg-white/40" />
-                        )}
+
+                        <AnimatePresence>
+                          {isDayOptionsOpen && isSelected && (
+                            <motion.div 
+                              initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="absolute bottom-[105%] left-1/2 -translate-x-1/2 z-[100] bg-white/98 dark:bg-slate-900/98 backdrop-blur-md rounded-2xl shadow-[0_10px_30px_-5px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-800/80 p-1.5 flex items-center gap-1.5 min-w-[160px]"
+                            >
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleEditDay(); }}
+                                className="flex flex-col items-center justify-center flex-1 h-11 bg-secondary text-white rounded-xl hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
+                              >
+                                <Edit size={14} />
+                                <span className="text-[8px] font-black mt-0.5 tracking-tighter">EDITAR</span>
+                              </button>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleDeleteDay(); }}
+                                className="flex flex-col items-center justify-center flex-1 h-11 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-xl border border-red-100/50 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all active:scale-95 shadow-sm"
+                              >
+                                <Trash2 size={14} />
+                                <span className="text-[8px] font-black mt-0.5 tracking-tighter">EXCLUIR</span>
+                              </button>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); setIsDayOptionsOpen(false); }}
+                                className="flex flex-col items-center justify-center flex-1 h-11 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95"
+                              >
+                                <X size={14} />
+                                <span className="text-[8px] font-black mt-0.5 tracking-tighter">FECHAR</span>
+                              </button>
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[8px] border-transparent border-t-white/98 dark:border-t-slate-900/98"></div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </AnimatePresence>
 
-                      <span className={`text-xl font-black ${textColor} ${isExtra ? '-translate-y-1.5' : ''}`}>{d}</span>
-                      
-                      {isExtra && (
-                        <div className="absolute bottom-1.5 w-full flex justify-center">
-                          <span className="text-[5px] font-black text-white/90 uppercase tracking-tighter bg-black/20 px-1 rounded-[2px] leading-none py-0.5">EXTRA</span>
-                        </div>
-                      )}
-
-                      {isAnchor && (
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 shadow-sm z-10" title="Início da Escala"></div>
-                      )}
-
-                      <AnimatePresence>
-                        {isDayOptionsOpen && isSelected && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 5, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="absolute bottom-[105%] left-1/2 -translate-x-1/2 z-[100] bg-white/98 dark:bg-slate-900/98 backdrop-blur-md rounded-2xl shadow-[0_10px_30px_-5px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-800/80 p-1.5 flex items-center gap-1.5 min-w-[160px]"
-                          >
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); handleEditDay(); }}
-                              className="flex flex-col items-center justify-center flex-1 h-11 bg-secondary text-white rounded-xl hover:bg-primary-dark transition-all active:scale-95 shadow-sm"
-                            >
-                              <Edit size={14} />
-                              <span className="text-[8px] font-black mt-0.5 tracking-tighter">EDITAR</span>
-                            </button>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); handleDeleteDay(); }}
-                              className="flex flex-col items-center justify-center flex-1 h-11 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-xl border border-red-100/50 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all active:scale-95 shadow-sm"
-                            >
-                              <Trash2 size={14} />
-                              <span className="text-[8px] font-black mt-0.5 tracking-tighter">EXCLUIR</span>
-                            </button>
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); setIsDayOptionsOpen(false); }}
-                              className="flex flex-col items-center justify-center flex-1 h-11 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95"
-                            >
-                              <X size={14} />
-                              <span className="text-[8px] font-black mt-0.5 tracking-tighter">FECHAR</span>
-                            </button>
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-[8px] border-transparent border-t-white/98 dark:border-t-slate-900/98"></div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {(() => {
+              const holidays = getBrazilianHolidays(currentYear, currentMonth);
+              if (holidays.length === 0) return null;
+              return (
+                <div className="mt-6 space-y-3">
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Feriados do Mês</h4>
+                  <div className="bg-[#1E293B] p-3 rounded-[10px] space-y-2">
+                    {holidays.map((h, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-white text-xs">
+                        <span>🎌</span>
+                        <span className="font-bold">{String(h.day).padStart(2, '0')}/{String(currentMonth + 1).padStart(2, '0')}</span>
+                        <span className="text-slate-300">- {h.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </section>
         </div>
       </div>
@@ -1162,7 +1268,7 @@ const CalendarScreen = ({
                         <button
                           key={color.value}
                           onClick={() => setModalData({...modalData, color: color.value})}
-                          className={`w-7 h-7 rounded-full flex-shrink-0 transition-all ${color.value} ${
+                          className={`w-8 h-8 rounded-full flex-shrink-0 transition-all ${color.value} ${
                             modalData.color === color.value 
                               ? 'ring-2 ring-warning ring-offset-2 scale-110' 
                               : 'hover:scale-105'
