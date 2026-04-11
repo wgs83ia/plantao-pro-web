@@ -566,7 +566,7 @@ const CalendarScreen = ({
           type: modalData.type,
           color: modalData.color,
           location: modalData.type === 'Extra' ? modalData.location : '',
-          duration: modalData.type === 'Extra' ? modalData.duration : undefined,
+          duration: modalData.type === 'Extra' ? modalData.duration : null,
           info: modalData.info,
           start: modalData.start,
           end: modalData.end
@@ -1416,7 +1416,7 @@ const AddShiftScreen = ({
         type: shiftType,
         color: selectedColor,
         location: shiftType === 'Extra' ? selectedExtraLocation : '',
-        duration: shiftType === 'Extra' ? selectedDuration : undefined
+        duration: shiftType === 'Extra' ? selectedDuration : null
       }
     }));
     onCancel();
@@ -1580,7 +1580,7 @@ const AnnualView = ({
   normalDayColor: string;
 }) => {
   const now = new Date();
-  const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
+  const [viewMode] = useState<'month' | 'year'>('year');
   const months = MONTHS;
 
   const currentYear = now.getFullYear();
@@ -1613,9 +1613,7 @@ const AnnualView = ({
 
   const totalHours = allShifts * 12;
 
-  const displayedMonths = viewMode === 'month' 
-    ? [months[currentMonthIdx]] 
-    : months;
+  const displayedMonths = months;
 
   return (
     <motion.div 
@@ -1626,31 +1624,9 @@ const AnnualView = ({
     >
       <section className="mt-8">
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-6">Visão Anual {currentYear}</h1>
-        <div className="bg-slate-100 p-1.5 rounded-2xl flex gap-1">
-          <button 
-            onClick={() => setViewMode('month')}
-            className={`flex-1 py-3 px-4 text-sm font-bold rounded-xl transition-all ${
-              viewMode === 'month' 
-                ? 'bg-secondary text-white shadow-sm' 
-                : 'text-slate-500 hover:bg-slate-50'
-            }`}
-          >
-            Mês Atual
-          </button>
-          <button 
-            onClick={() => setViewMode('year')}
-            className={`flex-1 py-3 px-4 text-sm font-bold rounded-xl transition-all ${
-              viewMode === 'year' 
-                ? 'bg-secondary text-white shadow-sm' 
-                : 'text-slate-500 hover:bg-slate-50'
-            }`}
-          >
-            Ano Inteiro
-          </button>
-        </div>
       </section>
 
-      <section className={`grid gap-6 ${viewMode === 'month' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+      <section className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {displayedMonths.map((month) => {
           const idx = months.indexOf(month);
           const daysInMonth = new Date(currentYear, idx + 1, 0).getDate();
@@ -2088,13 +2064,16 @@ export default function App() {
       const syncSettings = async () => {
         setIsSyncing(true);
         try {
+          // Sanitizar manualShifts para remover undefined (JSON.stringify remove chaves undefined)
+          const sanitizedManualShifts = JSON.parse(JSON.stringify(manualShifts));
+
           await updateDoc(doc(db, 'users', user.uid), {
             settings: {
               darkMode,
               selectedPattern,
               anchorDate: (anchorDate && !isNaN(anchorDate.getTime())) ? anchorDate.toISOString() : new Date().toISOString(),
               normalDayColor,
-              manualShifts,
+              manualShifts: sanitizedManualShifts,
               customWorkDays,
               customOffDays,
               hourlyRate,
