@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, Component } from 'react';
+import { useState, useEffect, useMemo, useRef, Component } from 'react';
 import { 
   Calendar, 
   Plus, 
@@ -337,20 +337,23 @@ const calculateEndTime = (startTime: string, duration: '12h' | '24h') => {
 // --- Components ---
 
 
-const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSyncing }: { title: string, showBack?: boolean, onBack?: () => void, onMenu?: () => void, user: FirebaseUser | null, isOffline?: boolean, isSyncing?: boolean }) => (
-  <header className="sticky top-0 z-40 bg-white dark:bg-dark border-b border-slate-200 dark:border-slate-800 shadow-sm pt-safe">
-    <div className="flex justify-between items-center w-full px-6 md:px-8 h-20 md:h-24">
-      <div className="flex items-center gap-2 md:gap-4 z-10">
-        <button onClick={onMenu} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-600 dark:text-slate-400">
-          <Menu size={24} className="md:w-7 md:h-7" />
+const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSyncing, onNavigate, currentScreen }: { title: string, showBack?: boolean, onBack?: () => void, onMenu?: () => void, user: FirebaseUser | null, isOffline?: boolean, isSyncing?: boolean, onNavigate: (screen: string) => void, currentScreen: string }) => (
+  <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md shadow-sm pt-safe">
+    <div className="flex justify-between items-center w-full px-6 md:px-12 h-20 md:h-24 max-w-[1400px] mx-auto">
+      <div className="flex items-center gap-4 md:gap-8 z-10 w-full">
+        {/* Mobile Menu Button */}
+        <button onClick={onMenu} className="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all text-slate-600 dark:text-slate-400 md:hidden active:scale-90">
+          <Menu size={24} />
         </button>
+
         {showBack && (
-          <button onClick={onBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-            <ArrowLeft size={22} className="md:w-6 md:h-6 text-slate-600 dark:text-slate-400" />
+          <button onClick={onBack} className="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all active:scale-90">
+            <ArrowLeft size={22} className="text-slate-600 dark:text-slate-400" />
           </button>
         )}
-        <div className="flex items-center gap-2 md:gap-4">
-          <div className="w-12 h-12 md:w-20 md:h-20 flex items-center justify-center">
+
+        <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
+          <div className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center">
             <img 
               src="/logo-plantao.png" 
               alt="Logo Plantão Pro" 
@@ -360,17 +363,80 @@ const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSy
             />
           </div>
           <div className="flex flex-col">
-            <h1 className="font-headline font-black text-lg md:text-xl tracking-tight text-slate-900 dark:text-white leading-none">PLANTÃO PRO</h1>
-            <div className="flex items-center gap-2 mt-1">
+            <h1 className="font-headline font-black text-base md:text-2xl tracking-tighter text-slate-900 dark:text-white leading-none">PLANTÃO PRO</h1>
+            <div className="flex items-center gap-1.5 mt-1">
               {isOffline ? (
-                <WifiOff size={12} className="text-red-500" />
+                <div className="flex items-center gap-1">
+                  <WifiOff size={10} className="text-red-500" />
+                  <span className="text-[8px] font-bold text-red-500 uppercase tracking-tighter">Offline</span>
+                </div>
               ) : isSyncing ? (
-                <RefreshCw size={12} className="text-blue-500 animate-spin" />
+                <div className="flex items-center gap-1">
+                  <RefreshCw size={10} className="text-blue-500 animate-spin" />
+                  <span className="text-[8px] font-bold text-blue-500 uppercase tracking-tighter">Sincronizando</span>
+                </div>
               ) : (
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+                  <span className="text-[8px] font-bold text-green-500 uppercase tracking-tighter">Online</span>
+                </div>
               )}
             </div>
           </div>
+        </div>
+
+        {/* Global Navigation - Desktop Only */}
+        <nav className="hidden md:flex items-center gap-2 ml-12 flex-grow justify-center">
+          {[
+            { id: 'calendar', label: 'Calendário', icon: Calendar },
+            { id: 'shifts', label: 'Escala', icon: ClipboardList },
+            { id: 'annual', label: 'Anual', icon: BarChart3 },
+          ].map((item) => {
+            const isActive = currentScreen === item.id || (item.id === 'calendar' && (currentScreen === 'addShift'));
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onNavigate(item.id)}
+                className={`flex items-center gap-2.5 px-6 py-2.5 rounded-2xl font-bold text-sm transition-all duration-300 ${
+                  isActive 
+                    ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' 
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'
+                }`}
+              >
+                <Icon size={18} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* User / Profile - Desktop Only */}
+        <div className="hidden md:flex items-center gap-4 flex-shrink-0">
+          <button 
+            onClick={() => onNavigate('profile')}
+            className={`flex items-center gap-3 p-1.5 pr-4 rounded-2xl transition-all ${
+              currentScreen === 'profile' 
+                ? 'bg-secondary/10 text-secondary' 
+                : 'hover:bg-slate-100 dark:hover:bg-slate-900 group'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+              currentScreen === 'profile' ? 'bg-secondary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:text-secondary'
+            }`}>
+              {user ? (
+                <img src={user.photoURL || "https://picsum.photos/seed/officer/100/100"} className="w-full h-full rounded-xl object-cover" />
+              ) : (
+                <User size={20} />
+              )}
+            </div>
+            <div className="flex flex-col items-start leading-tight">
+              <span className="text-xs font-black uppercase tracking-wider">Meu Perfil</span>
+              <span className={`text-[10px] font-bold ${currentScreen === 'profile' ? 'text-secondary/70' : 'text-slate-400'}`}>
+                {user ? user.displayName?.split(' ')[0] : 'Visitante'}
+              </span>
+            </div>
+          </button>
         </div>
       </div>
     </div>
@@ -386,57 +452,67 @@ const SideMenu = ({ isOpen, onClose, onProfile, onAnnual, user }: { isOpen: bool
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[60] bg-slate-950/40 backdrop-blur-md md:hidden"
         />
         <motion.div 
           initial={{ x: '-100%' }}
           animate={{ x: 0 }}
           exit={{ x: '-100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed top-0 left-0 bottom-0 w-[280px] z-[70] bg-white dark:bg-[#020617] shadow-2xl flex flex-col pt-safe"
+          className="fixed top-0 left-0 bottom-0 w-[280px] z-[70] bg-white dark:bg-slate-950 shadow-2xl flex flex-col pt-safe md:hidden"
         >
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+          <div className="p-8 flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <img src="/logo-plantao.png" alt="Logo" className="w-8 h-8 object-contain" />
-              <span className="font-headline font-black text-xl text-primary tracking-tighter">Plantão Pro</span>
+              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/5">
+                <img src="/logo-plantao.png" alt="Logo" className="w-6 h-6 object-contain" />
+              </div>
+              <span className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tighter">Plantão Pro</span>
             </div>
-            <button onClick={onClose} className="p-2 text-slate-400 hover:text-secondary">
-              <X size={24} />
+            <button onClick={onClose} className="p-2 text-slate-400 hover:text-secondary bg-slate-50 dark:bg-slate-900 rounded-xl transition-all">
+              <X size={20} />
             </button>
           </div>
           
-          <div className="flex-1 p-4 space-y-2">
-            <button 
-              onClick={() => { onAnnual(); onClose(); }}
-              className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-slate-700 dark:text-slate-200 font-bold"
-            >
-              <Calendar size={22} className="text-primary" />
-              <span>Visão Anual</span>
-            </button>
-            
-            <button 
-              onClick={() => { onProfile(); onClose(); }}
-              className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-slate-700 dark:text-slate-200 font-bold"
-            >
-              <User size={22} className="text-primary" />
-              <span>Perfil e Configurações</span>
-            </button>
+          <div className="flex-1 px-4 py-2 space-y-3">
+            {[
+              { id: 'calendar', label: 'Calendário', icon: Calendar, action: () => {} },
+              { id: 'shifts', label: 'Minha Escala', icon: ClipboardList, action: () => {} },
+              { id: 'annual', label: 'Visão Anual', icon: BarChart3, action: onAnnual },
+              { id: 'profile', label: 'Configurações', icon: Settings, action: onProfile },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <button 
+                  key={item.id}
+                  onClick={() => { item.action(); onClose(); }}
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900 transition-all text-slate-700 dark:text-slate-200 font-bold group"
+                >
+                  <div className="w-10 h-10 bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center group-hover:bg-white dark:group-hover:bg-slate-800 transition-all shadow-sm">
+                    <Icon size={20} className="text-primary" />
+                  </div>
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
           </div>
           
-          <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-            <div className="flex items-center gap-3">
+          <div className="p-6 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
               {user ? (
                 <>
-                  <img src={user.photoURL || "https://picsum.photos/seed/officer/100/100"} className="w-10 h-10 rounded-full border border-primary" />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[150px]">{user.displayName}</span>
-                    <span className="text-[10px] text-slate-400 truncate max-w-[150px]">{user.email}</span>
+                  <div className="relative">
+                    <img src={user.photoURL || "https://picsum.photos/seed/officer/100/100"} className="w-12 h-12 rounded-2xl object-cover ring-2 ring-primary/20 shadow-lg shadow-primary/10" />
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full" />
+                  </div>
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-sm font-black text-slate-900 dark:text-white truncate tracking-tight">{user.displayName}</span>
+                    <span className="text-[10px] font-bold text-slate-400 truncate uppercase mt-0.5">{user.email}</span>
                   </div>
                 </>
               ) : (
-                <div className="flex items-center gap-3 text-slate-400">
-                  <User size={24} />
-                  <span className="text-sm font-bold italic">Modo Visitante</span>
+                <div className="flex items-center gap-3 text-slate-400 py-1">
+                  <User size={24} className="opacity-50" />
+                  <span className="text-xs font-bold italic">Modo Visitante</span>
                 </div>
               )}
             </div>
@@ -923,35 +999,35 @@ const CalendarScreen = ({
         <aside className="w-full lg:w-96 shrink-0 space-y-8 order-2 lg:order-1">
           {/* Preenchimento Automático */}
           <section className="space-y-4">
-            <h2 className="text-xs font-bold text-slate-400 tracking-widest uppercase">PREENCHIMENTO AUTOMÁTICO</h2>
+            <h2 className="text-[10px] font-black text-slate-400 tracking-[0.2em] uppercase ml-1">Preenchimento Automático</h2>
             <div className="space-y-4">
-              <div className="bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl flex w-full border border-slate-200 dark:border-slate-700 shadow-inner">
+              <div className="bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl flex w-full shadow-inner">
                 <button 
                   onClick={() => setSelectedPattern('12X36')}
-                  className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
+                  className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-300 ${
                     selectedPattern === '12X36' 
-                      ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      ? 'bg-white dark:bg-slate-800 text-primary shadow-lg scale-[1.02]' 
+                      : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
                   }`}
                 >
                   12X36
                 </button>
                 <button 
                   onClick={() => setSelectedPattern('1X3')}
-                  className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
+                  className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-300 ${
                     selectedPattern === '1X3' 
-                      ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      ? 'bg-white dark:bg-slate-800 text-primary shadow-lg scale-[1.02]' 
+                      : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
                   }`}
                 >
                   1X3
                 </button>
                 <button 
                   onClick={() => setSelectedPattern('2X6')}
-                  className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
+                  className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-300 ${
                     selectedPattern === '2X6' 
-                      ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      ? 'bg-white dark:bg-slate-800 text-primary shadow-lg scale-[1.02]' 
+                      : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
                   }`}
                 >
                   2X6
@@ -959,30 +1035,30 @@ const CalendarScreen = ({
                 {hasCustomPattern && (
                   <button 
                     onClick={() => setSelectedPattern('custom')}
-                    className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-200 ${
+                    className={`flex-1 py-3 px-2 rounded-xl font-black text-xs transition-all duration-300 ${
                       selectedPattern === 'custom' 
-                        ? 'bg-white dark:bg-slate-600 text-primary-dark dark:text-white shadow-md scale-[1.02]' 
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                        ? 'bg-white dark:bg-slate-800 text-primary shadow-lg scale-[1.02]' 
+                        : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
                     }`}
                   >
                     {customWorkDays}X{customOffDays}
                   </button>
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <button 
                   onClick={() => setIsCustomModalOpen(true)}
-                  className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center gap-2 border border-transparent dark:border-slate-700`}
+                  className={`flex-1 py-3.5 px-4 rounded-xl font-black text-xs transition-all bg-slate-50 dark:bg-slate-900 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-2 shadow-sm`}
                 >
-                  <Settings size={16} />
-                  Personalizar
+                  <Settings size={16} className="text-primary" />
+                  PERSONALIZAR
                 </button>
                 <button 
                   onClick={() => setIsResetModalOpen(true)}
-                  className={`flex-1 py-3 px-4 rounded-xl font-bold text-sm transition-all bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 flex items-center justify-center gap-2 border border-transparent dark:border-red-900/20`}
+                  className={`flex-1 py-3.5 px-4 rounded-xl font-black text-xs transition-all bg-red-50/50 dark:bg-red-900/10 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center gap-2 shadow-sm`}
                 >
                   <Trash2 size={16} />
-                  Limpar
+                  LIMPAR
                 </button>
               </div>
             </div>
@@ -990,15 +1066,16 @@ const CalendarScreen = ({
 
           {/* Detalhes do Dia */}
           <section className="space-y-4">
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-l-4 border-primary-dark shadow-sm space-y-6 border border-slate-100 dark:border-slate-800">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] space-y-6 relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-1.5 h-full bg-primary-dark"></div>
               <div className="flex items-center justify-between">
-                <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Dia</h4>
-                <div className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tighter uppercase">Detalhes</h4>
+                <div className="bg-slate-50 dark:bg-slate-800 text-slate-500 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest group-hover:bg-primary/10 group-hover:text-primary transition-all">
                   {selectedDay} {months[currentMonth]}
                 </div>
               </div>
               
-              <div className="min-h-[100px] p-8 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800/50">
+              <div className="min-h-[120px] p-6 bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-100/50 dark:border-slate-800/50">
                 {(() => {
                   const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
                   const manualShift = manualShifts[dateKey];
@@ -1063,12 +1140,13 @@ const CalendarScreen = ({
 
           {/* Detalhes do Mês */}
           <section className="space-y-4">
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border-l-4 border-secondary shadow-sm space-y-6 border border-slate-100 dark:border-slate-800">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] space-y-6 relative overflow-hidden group border-none">
+              <div className="absolute top-0 left-0 w-1.5 h-full bg-secondary"></div>
               <div className="text-center">
-                <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tight">Detalhes do Mês</h4>
+                <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tighter uppercase">Visão do Mês</h4>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {(() => {
                   const monthPrefix = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
                   const monthExtras = Object.entries(manualShifts)
@@ -1077,40 +1155,34 @@ const CalendarScreen = ({
 
                   if (monthExtras.length === 0) {
                     return (
-                      <p className="text-center text-slate-400 text-sm italic py-4">Nenhum serviço extra este mês</p>
+                      <p className="text-center text-slate-400 text-[11px] font-bold uppercase tracking-widest py-6 bg-slate-50 dark:bg-slate-950/40 rounded-2xl">Nenhum serviço extra</p>
                     );
                   }
+                  
+                  // Sort by day
+                  monthExtras.sort((a, b) => a.date.localeCompare(b.date));
 
-                  // Group by location and color to avoid repetitions
-                  const uniqueExtras = monthExtras.reduce((acc, current) => {
-                    const location = current.location || 'Local não definido';
-                    const color = current.color || 'bg-warning';
-                    const key = `${location}-${color}`;
-                    
-                    if (!acc.find(item => `${item.location || 'Local não definido'}-${item.color || 'bg-warning'}` === key)) {
-                      acc.push(current);
-                    }
-                    return acc;
-                  }, [] as typeof monthExtras);
-
-                  return uniqueExtras.map((extra, idx) => {
+                  return monthExtras.map((extra, idx) => {
                     const colorClass = extra.color || 'bg-warning';
                     const textColorClass = colorClass.replace('bg-', 'text-');
+                    const day = extra.date.split('-')[2];
                     
                     return (
-                      <div key={idx} className="flex items-center justify-between p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                      <div key={idx} className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/40 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-800">
                         <div className="flex items-center gap-3">
-                          <div className={`w-2 h-10 rounded-full ${colorClass}`}></div>
-                          <div className="space-y-1">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Local</span>
-                            <p className={`text-sm font-black ${textColorClass}`}>
-                              {extra.location || 'Local não definido'}
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs ${colorClass} text-white shadow-lg shadow-warning/10`}>
+                            {day}
+                          </div>
+                          <div className="space-y-0.5">
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Local</span>
+                            <p className="text-sm font-black text-slate-900 dark:text-white leading-none">
+                              {extra.location || 'Não definido'}
                             </p>
                           </div>
                         </div>
-                        <div className="text-right space-y-1">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Duração</span>
-                          <p className={`text-sm font-black ${textColorClass}`}>
+                        <div className="text-right space-y-0.5">
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Duração</span>
+                          <p className={`text-xs font-black ${textColorClass}`}>
                             {extra.duration || '12h'}
                           </p>
                         </div>
@@ -1123,47 +1195,48 @@ const CalendarScreen = ({
           </section>
         </aside>
 
-        <div className="flex-1 w-full space-y-8 order-1 lg:order-2">
-          <section className="space-y-6">
-            <div className="flex items-center justify-between relative h-12 mb-4">
+        <div className="flex-1 w-full space-y-4 md:space-y-8 order-1 lg:order-2">
+          <section className="space-y-4 md:space-y-6">
+            <div className="flex items-center justify-between relative h-14 md:h-16 px-2">
               <button 
                 onClick={prevMonth} 
-                className="w-11 h-11 flex items-center justify-center text-slate-400 hover:text-secondary transition-colors z-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="w-12 h-12 flex items-center justify-center text-slate-400 hover:text-secondary transition-all z-10 rounded-2xl hover:bg-white dark:hover:bg-slate-900 shadow-sm md:shadow-none hover:shadow-md"
               >
-                <ChevronLeft size={24} />
+                <ChevronLeft size={28} />
               </button>
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <h3 className="font-bold text-lg text-[#F59E0B] tracking-tight">
-                  {months[currentMonth]} {currentYear}
+                <h3 className="font-headline font-black text-xl md:text-3xl text-slate-900 dark:text-white tracking-tighter uppercase">
+                  {months[currentMonth]} <span className="text-primary">{currentYear}</span>
                 </h3>
               </div>
               <button 
                 onClick={nextMonth} 
-                className="w-11 h-11 flex items-center justify-center text-slate-400 hover:text-secondary transition-colors z-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="w-12 h-12 flex items-center justify-center text-slate-400 hover:text-secondary transition-all z-10 rounded-2xl hover:bg-white dark:hover:bg-slate-900 shadow-sm md:shadow-none hover:shadow-md"
               >
-                <ChevronRight size={24} />
+                <ChevronRight size={28} />
               </button>
             </div>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${currentMonth}-${currentYear}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="bg-white dark:bg-slate-900 p-4 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-visible"
-              >
-                <div className="grid grid-cols-7 text-center mb-2">
-                  {weekDays.map(d => (
-                    <span key={d} className="text-[#94A3B8] font-bold text-[10px] uppercase tracking-[0.1em]">{d}</span>
-                  ))}
-                </div>
-                <div className="grid grid-cols-7 gap-[6px]">
-                  {emptyDays.map(e => (
-                    <div key={`empty-${e}`} className="aspect-square"></div>
-                  ))}
-                  {days.map(d => {
+      <AnimatePresence mode="wait">
+        {currentMonth !== null && (
+          <motion.div
+            key={`${currentMonth}-${currentYear}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white dark:bg-slate-900 p-2 md:p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-visible"
+          >
+            <div className="grid grid-cols-7 text-center mb-4">
+              {weekDays.map(d => (
+                <span key={d} className="text-slate-400 dark:text-slate-500 font-black text-[9px] md:text-[11px] uppercase tracking-wider">{d}</span>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1 md:gap-3">
+              {emptyDays.map(e => (
+                <div key={`empty-${e}`} className="aspect-square"></div>
+              ))}
+              {days.map(d => {
                     const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     const hasShift = checkIsWorkday(d);
                     const manualShift = manualShifts[dateKey];
@@ -1270,8 +1343,9 @@ const CalendarScreen = ({
                     );
                   })}
                 </div>
-              </motion.div>
-            </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
             {(() => {
               const holidays = getBrazilianHolidays(currentYear, currentMonth);
@@ -1881,71 +1955,124 @@ const AnnualView = ({
   );
 };
 
-const ScheduledShifts = () => {
+const ScheduledShifts = ({ manualShifts, anchorDate, selectedPattern, customWorkDays, customOffDays, hourlyRate }: { 
+  manualShifts: Record<string, any>, 
+  anchorDate: Date | null,
+  selectedPattern: string,
+  customWorkDays: number,
+  customOffDays: number,
+  hourlyRate: number
+}) => {
+  const now = new Date();
+  
+  // Calculate upcoming shifts for the next 30 days
+  const upcomingShifts = useMemo(() => {
+    if (!anchorDate) return [];
+    const shifts = [];
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    for (let i = 0; i < 30; i++) {
+      const checkDate = new Date(startOfToday);
+      checkDate.setDate(checkDate.getDate() + i);
+      const dateKey = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+      
+      const hasShift = calculateIsWorkday(checkDate, anchorDate, selectedPattern, customWorkDays, customOffDays);
+      const manualShift = manualShifts[dateKey];
+      
+      if (manualShift?.type === 'Folga') continue;
+      
+      if (manualShift || hasShift) {
+        shifts.push({
+          date: checkDate,
+          dateKey,
+          type: manualShift?.type || 'Normal',
+          location: manualShift?.location || 'Delegacia Central',
+          start: manualShift?.start || '07:00',
+          end: manualShift?.end || '19:00',
+          color: manualShift?.color || (manualShift?.type === 'Extra' ? 'bg-warning' : 'bg-primary')
+        });
+      }
+    }
+    return shifts;
+  }, [anchorDate, manualShifts, selectedPattern, customWorkDays, customOffDays]);
+
+  const totalEarnings = upcomingShifts.length * 12 * hourlyRate; // Simplified calculation
+
   return (
     <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="px-6 space-y-8 pb-32"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="space-y-8 pb-32 pt-4"
     >
-      <section className="mt-8">
-        <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white leading-tight tracking-tight">Escala de Serviço</h1>
-        <p className="text-slate-500 dark:text-slate-400 font-medium mt-2">Gerencie sua jornada operacional com precisão.</p>
+      <section className="px-2">
+        <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white leading-none tracking-tighter uppercase">Minha Escala</h1>
+        <p className="text-slate-400 dark:text-slate-500 font-bold text-xs md:text-sm mt-3 uppercase tracking-widest">Próximos 30 dias de jornada operacional.</p>
       </section>
 
-      <div className="flex gap-8 border-b border-slate-100 dark:border-slate-800 relative">
-        <button className="pb-4 text-secondary font-bold tracking-wide relative">
-          Normal
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-secondary rounded-t-full"></div>
-        </button>
-        <button className="pb-4 text-slate-400 dark:text-slate-500 font-semibold tracking-wide">Extra</button>
+      <div className="grid grid-cols-2 gap-4 px-2">
+        <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Total de Turnos</p>
+          <div className="flex items-end gap-1">
+            <p className="text-3xl font-black text-primary leading-none">{upcomingShifts.length}</p>
+            <span className="text-[10px] font-bold text-slate-400 mb-0.5">plantões</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Estimativa Extra</p>
+          <div className="flex items-end gap-1">
+            <p className="text-3xl font-black text-green-500 leading-none">R$ {(upcomingShifts.filter(s => s.type === 'Extra').length * 12 * hourlyRate / 1000).toFixed(1)}k</p>
+            <span className="text-[10px] font-bold text-slate-400 mb-0.5">bruto</span>
+          </div>
+        </div>
       </div>
 
-      <section className="space-y-8">
-        <div>
-          <div className="flex items-center gap-4 mb-6">
-            <span className="text-xs font-bold tracking-[0.2em] text-slate-400 dark:text-slate-500 uppercase">{MONTHS[new Date().getMonth()]} {new Date().getFullYear()}</span>
-            <div className="h-[1px] flex-grow bg-slate-100 dark:bg-slate-800"></div>
-          </div>
-          <div className="space-y-4">
-            {[
-              { date: '12 Mar', day: 'Qui', title: 'Delegacia Central', time: '09:00 - 17:00', hours: '8h total' },
-              { date: '15 Mar', day: 'Dom', title: 'Unidade de Choque', time: '08:00 - 20:00', hours: '12h total' },
-            ].map(shift => (
-              <div key={shift.date} className="bg-white dark:bg-slate-900 rounded-2xl p-6 flex items-start gap-6 relative overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm">
-                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary-dark"></div>
-                <div className="flex flex-col items-center min-w-[56px]">
-                  <span className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase">{shift.date}</span>
-                  <span className="text-slate-900 dark:text-white font-bold text-lg">{shift.day}</span>
+      <section className="space-y-4 px-2">
+        <div className="flex items-center gap-4 mb-6">
+          <span className="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">Linha do Tempo</span>
+          <div className="h-[1px] flex-grow bg-slate-100 dark:bg-slate-800"></div>
+        </div>
+        
+        <div className="space-y-4">
+          {upcomingShifts.length > 0 ? (
+            upcomingShifts.map((shift, idx) => (
+              <motion.div 
+                key={idx}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.05 }}
+                className="bg-white dark:bg-slate-900 rounded-3xl p-6 flex items-center gap-6 relative overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)] group hover:shadow-lg transition-all border-none"
+              >
+                <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${shift.color}`}></div>
+                <div className="flex flex-col items-center min-w-[60px] py-1 bg-slate-50 dark:bg-slate-950 rounded-2xl">
+                  <span className="text-slate-400 font-black text-[9px] uppercase tracking-tighter">{shift.date.toLocaleDateString('pt-BR', { month: 'short' })}</span>
+                  <span className="text-slate-900 dark:text-white font-black text-xl leading-none">{shift.date.getDate()}</span>
+                  <span className="text-primary font-bold text-[8px] uppercase">{shift.date.toLocaleDateString('pt-BR', { weekday: 'short' })}</span>
                 </div>
                 <div className="flex-grow">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold text-lg text-slate-900 dark:text-white">{shift.title}</h3>
-                    <Clock size={18} className="text-secondary" />
+                  <div className="flex justify-between items-center mb-1">
+                    <h3 className="font-black text-base text-slate-900 dark:text-white tracking-tight uppercase">{shift.location}</h3>
+                    <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${shift.type === 'Extra' ? 'bg-warning/10 text-warning' : 'bg-primary/10 text-primary'}`}>
+                      {shift.type}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400 font-medium text-sm">
-                    <span className="flex items-center gap-1"><Clock size={12} /> {shift.time}</span>
-                    <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-slate-700"></span>
-                    <span className="font-bold text-secondary">{shift.hours}</span>
+                  <div className="flex items-center gap-3 text-slate-400 font-bold text-[11px] uppercase tracking-wide">
+                    <span className="flex items-center gap-1.5"><Clock size={12} className="text-slate-300" /> {shift.start} — {shift.end}</span>
                   </div>
                 </div>
+              </motion.div>
+            ))
+          ) : (
+            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-[32px] shadow-inner">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Calendar size={32} className="text-slate-200" />
               </div>
-            ))}
-          </div>
+              <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Nenhum plantão agendado</p>
+              <p className="text-slate-300 text-xs mt-2 italic px-8">Inicie sua escala no calendário para visualizar aqui.</p>
+            </div>
+          )}
         </div>
       </section>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-slate-100 dark:bg-slate-900 rounded-2xl p-6 border border-transparent dark:border-slate-800">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">Total no Mês</p>
-          <p className="text-lg font-bold text-secondary">28h</p>
-        </div>
-        <div className="bg-slate-100 dark:bg-slate-900 rounded-2xl p-6 border border-transparent dark:border-slate-800">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">Remuneração</p>
-          <p className="text-lg font-bold text-green-600">R$ 1.4k</p>
-        </div>
-      </div>
     </motion.div>
   );
 };
@@ -2005,14 +2132,31 @@ export default function App() {
     const saved = localStorage.getItem('hourlyRate');
     return saved ? Number(saved) : 45;
   });
-  const [notificationTime, setNotificationTime] = useState<'15m' | '30m' | '1h' | '2h'>(() => {
-    const saved = localStorage.getItem('notificationTime');
-    return (saved as any) || '30m';
+  const [notificationSettings, setNotificationSettings] = useState({
+    enabled: true,
+    offset: 30,
+    notifyNormal: true,
+    notifyExtra: true
   });
-  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
-    const saved = localStorage.getItem('notificationsEnabled');
-    return saved !== null ? saved === 'true' : true;
-  });
+  const notifiedShiftsRef = React.useRef<Set<string>>(new Set());
+
+  // Initialization from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('notificationSettings');
+    if (saved) {
+      try {
+        setNotificationSettings(JSON.parse(saved));
+      } catch (e) {
+        console.error('Error parsing notification settings', e);
+      }
+    }
+  }, []);
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem('notificationSettings', JSON.stringify(notificationSettings));
+  }, [notificationSettings]);
+
   const [workplace, setWorkplace] = useState(() => {
     const saved = localStorage.getItem('workplace');
     return saved || 'Delegacia Central';
@@ -2028,44 +2172,93 @@ export default function App() {
   const [selectedShiftForAlert, setSelectedShiftForAlert] = useState<{ date: string, location: string, startTime: string, endTime: string, type: string } | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Sincronizar com localStorage para funcionamento offline
+  // Request notification permission
   useEffect(() => {
-    localStorage.setItem('selectedPattern', selectedPattern);
-    if (anchorDate && !isNaN(anchorDate.getTime())) {
-      localStorage.setItem('anchorDate', anchorDate.toISOString());
+    if (notificationSettings.enabled && Notification.permission === 'default') {
+      Notification.requestPermission();
     }
-    localStorage.setItem('manualShifts', JSON.stringify(manualShifts));
-    localStorage.setItem('customWorkDays', String(customWorkDays));
-    localStorage.setItem('customOffDays', String(customOffDays));
-    localStorage.setItem('hourlyRate', String(hourlyRate));
-    localStorage.setItem('notificationTime', notificationTime);
-    localStorage.setItem('notificationsEnabled', String(notificationsEnabled));
-    localStorage.setItem('workplace', workplace);
-    localStorage.setItem('profession', profession);
-    localStorage.setItem('extraLocations', JSON.stringify(extraLocations));
-    localStorage.setItem('darkMode', String(darkMode));
-  }, [selectedPattern, anchorDate, manualShifts, customWorkDays, customOffDays, hourlyRate, notificationTime, notificationsEnabled, workplace, profession, extraLocations, darkMode]);
+  }, [notificationSettings.enabled]);
 
   // Lógica de Alertas Inteligentes
   useEffect(() => {
-    if (!notificationsEnabled || !anchorDate) return;
+    if (!notificationSettings.enabled || !anchorDate) return;
+
+    const sendNotification = (title: string, body: string) => {
+      if (Notification.permission === 'granted') {
+        new Notification(title, { 
+          body,
+          icon: '/logo-plantao.png'
+        });
+      }
+    };
 
     const checkNextShift = () => {
       const now = new Date();
-      // Encontrar o próximo turno
-      // Para simplificar, vamos apenas verificar se há um turno hoje ou amanhã
-      // e se estamos dentro do tempo de notificação
-      
-      // Esta é uma simulação simplificada. Em um app real, 
-      // usaríamos um Service Worker para agendar notificações.
-      console.log('Verificando próximos turnos para alertas...');
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+
+      const daysToCheck = [today, tomorrow];
+
+      daysToCheck.forEach(checkDate => {
+        const dateKey = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+        const hasShift = calculateIsWorkday(
+          checkDate, 
+          anchorDate, 
+          selectedPattern, 
+          customWorkDays, 
+          customOffDays
+        );
+        const manualShift = manualShifts[dateKey];
+
+        const isExtra = manualShift?.type === 'Extra';
+        const isNormal = manualShift?.type === 'Normal' || (!manualShift && hasShift);
+        const isFolga = manualShift?.type === 'Folga';
+
+        if (isFolga) return;
+
+        let startTimeStr = '07:00';
+        let type = 'Normal';
+        
+        if (manualShift) {
+          startTimeStr = manualShift.start || '07:00';
+          type = manualShift.type;
+        }
+
+        // Filter by user preference
+        if (type === 'Normal' && !notificationSettings.notifyNormal) return;
+        if (type === 'Extra' && !notificationSettings.notifyExtra) return;
+
+        const [h, m] = startTimeStr.split(':').map(Number);
+        const shiftStart = new Date(checkDate);
+        shiftStart.setHours(h, m, 0, 0);
+
+        const diffMinutes = (shiftStart.getTime() - now.getTime()) / (1000 * 60);
+
+        // Notify if within the offset window (e.g., between offset and offset-1 minutes before)
+        // We use a small range to ensure we catch it in the 1-minute interval loop
+        if (diffMinutes > 0 && diffMinutes <= notificationSettings.offset && diffMinutes > notificationSettings.offset - 2) {
+          const shiftId = `${dateKey}_${startTimeStr}_${type}`;
+          if (!notifiedShiftsRef.current.has(shiftId)) {
+            const title = `Lembrete de Plantão: ${type}`;
+            const body = `Seu plantão começa em ${Math.round(diffMinutes)} minutos às ${startTimeStr}.`;
+            sendNotification(title, body);
+            notifiedShiftsRef.current.add(shiftId);
+            
+            // Clean up old notifications (more than 2 days old) from ref to prevent memory leak
+            if (notifiedShiftsRef.current.size > 50) {
+              notifiedShiftsRef.current = new Set(Array.from(notifiedShiftsRef.current).slice(-20));
+            }
+          }
+        }
+      });
     };
 
     const intervalId = setInterval(checkNextShift, 60000); // Verificar a cada minuto
     checkNextShift();
 
     return () => clearInterval(intervalId);
-  }, [notificationsEnabled, anchorDate, selectedPattern, notificationTime, manualShifts, customWorkDays, customOffDays]);
+  }, [notificationSettings, anchorDate, selectedPattern, manualShifts, customWorkDays, customOffDays]);
 
   // Limpar plantões que não coincidem mais com a nova escala
   useEffect(() => {
@@ -2163,8 +2356,17 @@ export default function App() {
               if (s.customWorkDays) setCustomWorkDays(s.customWorkDays);
               if (s.customOffDays) setCustomOffDays(s.customOffDays);
               if (s.hourlyRate) setHourlyRate(s.hourlyRate);
-              if (s.notificationTime) setNotificationTime(s.notificationTime);
-              if (s.notificationsEnabled !== undefined) setNotificationsEnabled(s.notificationsEnabled);
+              if (s.notifications) {
+                setNotificationSettings(s.notifications);
+              } else if (s.notificationTime || s.notificationsEnabled !== undefined) {
+                // Migrate old settings
+                setNotificationSettings({
+                  enabled: s.notificationsEnabled ?? true,
+                  offset: s.notificationTime === '15m' ? 15 : s.notificationTime === '30m' ? 30 : s.notificationTime === '1h' ? 60 : 120,
+                  notifyNormal: true,
+                  notifyExtra: true
+                });
+              }
               if (s.workplace) setWorkplace(s.workplace);
               if (s.extraLocations) {
                 if (Array.isArray(s.extraLocations)) {
@@ -2191,8 +2393,12 @@ export default function App() {
                 customWorkDays: 2,
                 customOffDays: 5,
                 hourlyRate: 45,
-                notificationTime: '30m',
-                notificationsEnabled: true,
+                notifications: {
+                  enabled: true,
+                  offset: 30,
+                  notifyNormal: true,
+                  notifyExtra: true
+                },
                 workplace: 'Delegacia Central',
                 extraLocations: ['Setor Alfa', 'Base Operacional'],
                 profession: 'Sargento'
@@ -2240,8 +2446,7 @@ export default function App() {
               customWorkDays,
               customOffDays,
               hourlyRate,
-              notificationTime,
-              notificationsEnabled,
+              notifications: notificationSettings,
               workplace,
               profession,
               extraLocations
@@ -2263,7 +2468,7 @@ export default function App() {
   }, [
     user, loading, firestoreLoaded, darkMode, selectedPattern, anchorDate, normalDayColor, 
     manualShifts, customWorkDays, customOffDays, hourlyRate, 
-    notificationTime, notificationsEnabled, workplace, profession, extraLocations
+    notificationSettings, workplace, profession, extraLocations
   ]);
 
   const handleNavigate = (screen: string) => {
@@ -2310,7 +2515,16 @@ export default function App() {
           />
         );
       case 'shifts':
-        return <ScheduledShifts />;
+        return (
+          <ScheduledShifts 
+            manualShifts={manualShifts}
+            anchorDate={anchorDate}
+            selectedPattern={selectedPattern}
+            customWorkDays={customWorkDays}
+            customOffDays={customOffDays}
+            hourlyRate={hourlyRate}
+          />
+        );
       case 'profile':
         return (
           <ProfileScreen 
@@ -2329,6 +2543,8 @@ export default function App() {
             setExtraLocations={setExtraLocations}
             profession={profession}
             setProfession={setProfession}
+            notificationSettings={notificationSettings}
+            setNotificationSettings={setNotificationSettings}
           />
         );
       default:
@@ -2408,9 +2624,11 @@ export default function App() {
           user={user}
           isOffline={isOffline}
           isSyncing={isSyncing}
+          onNavigate={handleNavigate}
+          currentScreen={currentScreen}
         />
         
-        <main className="max-w-[1200px] ml-0 md:ml-8 lg:ml-12 px-6 md:px-8 pt-2 md:pt-4">
+        <main className="max-w-[1400px] mx-auto px-2 md:px-12 pt-2 md:pt-8 relative z-10">
           <AnimatePresence mode="wait">
             {renderScreen()}
           </AnimatePresence>
