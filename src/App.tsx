@@ -13,6 +13,7 @@ import {
   ChevronLeft, 
   ChevronRight, 
   CheckCircle2, 
+  Check,
   ArrowLeftRight,
   MoreVertical,
   ArrowLeft,
@@ -221,6 +222,58 @@ const MONTHS = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ];
 
+const COLOR_PICKER_GROUPS = [
+  { 
+    name: 'Temas', 
+    colors: [
+      { name: 'Principal', value: 'bg-primary' },
+      { name: 'Secundário', value: 'bg-secondary' },
+      { name: 'Extra', value: 'bg-warning' },
+      { name: 'Sucesso', value: 'bg-success' },
+    ] 
+  },
+  { 
+    name: 'Vermelho', 
+    colors: ['bg-red-100', 'bg-red-200', 'bg-red-300', 'bg-red-400', 'bg-red-500', 'bg-red-600', 'bg-red-700', 'bg-red-800', 'bg-red-900'] 
+  },
+  { 
+    name: 'Laranja', 
+    colors: ['bg-orange-100', 'bg-orange-200', 'bg-orange-300', 'bg-orange-400', 'bg-orange-500', 'bg-orange-600', 'bg-orange-700', 'bg-orange-800', 'bg-orange-900'] 
+  },
+  { 
+    name: 'Âmbar', 
+    colors: ['bg-amber-100', 'bg-amber-200', 'bg-amber-300', 'bg-amber-400', 'bg-amber-500', 'bg-amber-600', 'bg-amber-700', 'bg-amber-800', 'bg-amber-900'] 
+  },
+  { 
+    name: 'Verde', 
+    colors: ['bg-emerald-100', 'bg-emerald-200', 'bg-emerald-300', 'bg-emerald-400', 'bg-emerald-500', 'bg-emerald-600', 'bg-emerald-700', 'bg-emerald-800', 'bg-emerald-900'] 
+  },
+  { 
+    name: 'Ciano', 
+    colors: ['bg-cyan-100', 'bg-cyan-200', 'bg-cyan-300', 'bg-cyan-400', 'bg-cyan-500', 'bg-cyan-600', 'bg-cyan-700', 'bg-cyan-800', 'bg-cyan-900'] 
+  },
+  { 
+    name: 'Azul', 
+    colors: ['bg-blue-100', 'bg-blue-200', 'bg-blue-300', 'bg-blue-400', 'bg-blue-500', 'bg-blue-600', 'bg-blue-700', 'bg-blue-800', 'bg-blue-900'] 
+  },
+  { 
+    name: 'Índigo', 
+    colors: ['bg-indigo-100', 'bg-indigo-200', 'bg-indigo-300', 'bg-indigo-400', 'bg-indigo-500', 'bg-indigo-600', 'bg-indigo-700', 'bg-indigo-800', 'bg-indigo-900'] 
+  },
+  { 
+    name: 'Roxo', 
+    colors: ['bg-purple-100', 'bg-purple-200', 'bg-purple-300', 'bg-purple-400', 'bg-purple-500', 'bg-purple-600', 'bg-purple-700', 'bg-purple-800', 'bg-purple-900'] 
+  },
+  { 
+    name: 'Rosa', 
+    colors: ['bg-pink-100', 'bg-pink-200', 'bg-pink-300', 'bg-pink-400', 'bg-pink-500', 'bg-pink-600', 'bg-pink-700', 'bg-pink-800', 'bg-pink-900'] 
+  },
+  { 
+    name: 'Cinza', 
+    colors: ['bg-slate-100', 'bg-slate-200', 'bg-slate-300', 'bg-slate-400', 'bg-slate-500', 'bg-slate-600', 'bg-slate-700', 'bg-slate-800', 'bg-slate-900'] 
+  },
+];
+
 // --- Helper Functions ---
 const calculateIsWorkday = (date: Date, anchorDate: Date | null, pattern: string, customWorkDays: number, customOffDays: number) => {
   if (!anchorDate || isNaN(anchorDate.getTime())) return false;
@@ -272,6 +325,14 @@ const MOCK_SHIFTS: Shift[] = [
     sector: 'Operações Especiais'
   }
 ];
+
+const calculateEndTime = (startTime: string, duration: '12h' | '24h') => {
+  if (!startTime) return '19:00';
+  const [hours, minutes] = startTime.split(':').map(Number);
+  const durationNum = duration === '24h' ? 24 : 12;
+  const endHours = (hours + durationNum) % 24;
+  return `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
 
 // --- Components ---
 
@@ -386,6 +447,107 @@ const SideMenu = ({ isOpen, onClose, onProfile, onAnnual, user }: { isOpen: bool
   </AnimatePresence>
 );
 
+const ColorPicker = ({ selectedColor, onColorSelect }: { selectedColor: string, onColorSelect: (color: string) => void }) => {
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center px-1">
+        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Paleta de Cores</label>
+        {activeGroup && (
+          <button 
+            onClick={() => setActiveGroup(null)}
+            className="text-[9px] font-bold text-secondary uppercase hover:underline"
+          >
+            Voltar
+          </button>
+        )}
+      </div>
+
+      <div className="relative min-h-[140px] bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl p-3 border border-slate-100 dark:border-slate-800 transition-all group">
+        <AnimatePresence mode="wait">
+          {!activeGroup ? (
+            <motion.div 
+              key="base-colors"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="grid grid-cols-5 sm:grid-cols-6 gap-3"
+            >
+              {COLOR_PICKER_GROUPS.map((group) => {
+                const baseColor = group.name === 'Temas' 
+                  ? (group.colors[0] as {value: string}).value 
+                  : group.colors[4] as string;
+                
+                const isGroupActive = group.colors.some(c => 
+                  typeof c === 'string' ? c === selectedColor : c.value === selectedColor
+                );
+
+                return (
+                  <button
+                    key={group.name}
+                    onClick={() => setActiveGroup(group.name)}
+                    className={`aspect-square rounded-xl flex-shrink-0 transition-all shadow-sm flex items-center justify-center ${baseColor} border-2 ${isGroupActive ? 'border-secondary scale-110 shadow-md ring-2 ring-secondary/20' : 'border-white dark:border-slate-800'} hover:scale-105 active:scale-95`}
+                    title={group.name}
+                  >
+                    {isGroupActive && <div className="w-2 h-2 rounded-full bg-white shadow-sm animate-pulse" />}
+                    {!isGroupActive && <div className="w-1.5 h-1.5 rounded-full bg-white/40" />}
+                  </button>
+                );
+              })}
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="shades"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="absolute inset-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm rounded-2xl p-3 flex flex-col"
+            >
+              <div className="flex items-center justify-between mb-3 px-1">
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full shadow-sm ${
+                    COLOR_PICKER_GROUPS.find(g => g.name === activeGroup)?.name === 'Temas'
+                    ? 'bg-secondary'
+                    : (COLOR_PICKER_GROUPS.find(g => g.name === activeGroup)?.colors[4] as string)
+                  }`} />
+                  <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">{activeGroup}</span>
+                </div>
+                <button 
+                  onClick={() => setActiveGroup(null)}
+                  className="p-1 px-3 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-[9px] font-black text-slate-500 hover:text-secondary uppercase"
+                >
+                  Fechar
+                </button>
+              </div>
+              <div className="grid grid-cols-5 gap-2 overflow-y-auto no-scrollbar pb-1">
+                {COLOR_PICKER_GROUPS.find(g => g.name === activeGroup)?.colors.map((color) => {
+                  const colorValue = typeof color === 'string' ? color : color.value;
+                  const colorName = typeof color === 'string' ? `${activeGroup} tom` : color.name;
+                  return (
+                    <button
+                      key={colorValue}
+                      onClick={() => onColorSelect(colorValue)}
+                      className={`aspect-square w-full rounded-lg flex items-center justify-center transition-all ${colorValue} ${
+                        selectedColor === colorValue 
+                          ? 'ring-2 ring-secondary ring-offset-2 scale-110 shadow-lg z-10' 
+                          : 'hover:scale-110 opacity-90 hover:opacity-100'
+                      }`}
+                      title={colorName}
+                    >
+                      {selectedColor === colorValue && <Check size={16} className="text-white drop-shadow-md" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
 // --- Screens ---
 
 
@@ -427,6 +589,7 @@ const CalendarScreen = ({
   setNormalDayColor: (color: string) => void;
 }) => {
   const now = new Date();
+  const [activeColorGroup, setActiveColorGroup] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(now.getMonth());
   const [currentYear, setCurrentYear] = useState(now.getFullYear());
   const [selectedDay, setSelectedDay] = useState<number>(now.getDate());
@@ -445,21 +608,6 @@ const CalendarScreen = ({
     isStartOfScale: false,
     info: ''
   });
-
-  const shiftColors = [
-    { name: 'Laranja', value: 'bg-primary' },
-    { name: 'Azul', value: 'bg-secondary' },
-    { name: 'Amarelo', value: 'bg-warning' },
-    { name: 'Verde', value: 'bg-success' },
-    { name: 'Índigo', value: 'bg-indigo-600' },
-    { name: 'Vermelho', value: 'bg-red-500' },
-    { name: 'Cinza', value: 'bg-slate-500' },
-    { name: 'Esmeralda', value: 'bg-emerald-500' },
-    { name: 'Roxo', value: 'bg-purple-500' },
-    { name: 'Rosa', value: 'bg-pink-500' },
-    { name: 'Ciano', value: 'bg-cyan-500' },
-    { name: 'Preto', value: 'bg-slate-900' },
-  ];
 
   const months = MONTHS;
 
@@ -532,10 +680,21 @@ const CalendarScreen = ({
 
   const handleSaveChanges = () => {
     const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
-    const isWorkday = checkIsWorkday(selectedDay);
+    
+    // Use the values that WILL be applied after state updates
+    const effectiveAnchorDate = modalData.isStartOfScale ? new Date(currentYear, currentMonth, selectedDay) : anchorDate;
+    const effectiveNormalColor = (modalData.isStartOfScale && modalData.type === 'Normal') ? modalData.color : normalDayColor;
+    
+    const isWorkday = calculateIsWorkday(
+      new Date(currentYear, currentMonth, selectedDay),
+      effectiveAnchorDate,
+      selectedPattern,
+      customWorkDays,
+      customOffDays
+    );
     
     if (modalData.isStartOfScale) {
-      setAnchorDate(new Date(currentYear, currentMonth, selectedDay));
+      setAnchorDate(effectiveAnchorDate);
       if (modalData.type === 'Normal') {
         setNormalDayColor(modalData.color);
       }
@@ -547,7 +706,7 @@ const CalendarScreen = ({
                             !modalData.info && 
                             modalData.start === '07:00' && 
                             modalData.end === '19:00' && 
-                            modalData.color === normalDayColor;
+                            modalData.color === effectiveNormalColor;
                             
     const isDefaultFolga = modalData.type === 'Folga' && 
                            !isWorkday && 
@@ -1118,14 +1277,13 @@ const CalendarScreen = ({
               const holidays = getBrazilianHolidays(currentYear, currentMonth);
               if (holidays.length === 0) return null;
               return (
-                <div className="mt-6 space-y-3">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Feriados do Mês</h4>
-                  <div className="bg-[#1E293B] p-3 rounded-[10px] space-y-2">
+                <div className="mt-4 pb-4">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                     {holidays.map((h, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-white text-xs">
-                        <span>🎌</span>
-                        <span className="font-bold">{String(h.day).padStart(2, '0')}/{String(currentMonth + 1).padStart(2, '0')}</span>
-                        <span className="text-slate-300">- {h.name}</span>
+                      <div key={idx} className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 text-[11px] hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                        <span className="text-[10px]">🎌</span>
+                        <span className="font-bold whitespace-nowrap">{String(h.day).padStart(2, '0')}/{String(currentMonth + 1).padStart(2, '0')}</span>
+                        <span className="whitespace-nowrap opacity-90">{h.name}</span>
                       </div>
                     ))}
                   </div>
@@ -1150,44 +1308,45 @@ const CalendarScreen = ({
               initial={{ opacity: 0, y: 100, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 100, scale: 0.95 }}
-              className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+              className="relative w-[92%] sm:w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
             >
-              <div className="p-4 flex justify-end items-center">
+              <div className="p-4 flex justify-between items-center border-b border-slate-50 dark:border-slate-800">
+                <h3 className="font-bold text-sm text-slate-900 dark:text-white uppercase tracking-wider">Editar Plantão</h3>
                 <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-400">
                   <X size={20} />
                 </button>
               </div>
               
-              <div className="p-4 pt-0 space-y-4 overflow-y-auto no-scrollbar">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tipo de Serviço</label>
+              <div className="p-5 pt-4 space-y-5 overflow-y-auto no-scrollbar">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Tipo de Serviço</label>
                   <div className="grid grid-cols-3 gap-2">
                     <button 
-                      onClick={() => setModalData({...modalData, type: 'Normal'})}
-                      className={`py-2 px-2 rounded-xl font-bold text-[11px] border-2 transition-all ${
+                      onClick={() => setModalData(prev => ({...prev, type: 'Normal'}))}
+                      className={`py-3 px-2 rounded-xl font-bold text-[11px] sm:text-xs border-2 transition-all ${
                         modalData.type === 'Normal' 
-                          ? 'border-secondary bg-blue-50 dark:bg-blue-900/20 text-secondary dark:text-blue-400' 
-                          : 'border-slate-100 dark:border-slate-800 text-slate-500'
+                          ? 'border-secondary bg-blue-50 dark:bg-blue-900/20 text-secondary dark:text-blue-400 shadow-sm' 
+                          : 'border-slate-100 dark:border-slate-800 text-slate-500 hover:border-slate-200'
                       }`}
                     >
                       Normal
                     </button>
                     <button 
-                      onClick={() => setModalData({...modalData, type: 'Extra'})}
-                      className={`py-2 px-2 rounded-xl font-bold text-[11px] border-2 transition-all ${
+                      onClick={() => setModalData(prev => ({...prev, type: 'Extra'}))}
+                      className={`py-3 px-2 rounded-xl font-bold text-[11px] sm:text-xs border-2 transition-all ${
                         modalData.type === 'Extra' 
-                          ? 'border-warning bg-amber-50 dark:bg-amber-900/20 text-warning dark:text-amber-400' 
-                          : 'border-slate-100 dark:border-slate-800 text-slate-500'
+                          ? 'border-warning bg-amber-50 dark:bg-amber-900/20 text-warning dark:text-amber-400 shadow-sm' 
+                          : 'border-slate-100 dark:border-slate-800 text-slate-500 hover:border-slate-200'
                       }`}
                     >
                       Extra
                     </button>
                     <button 
-                      onClick={() => setModalData({...modalData, type: 'Folga'})}
-                      className={`py-2 px-2 rounded-xl font-bold text-[11px] border-2 transition-all ${
+                      onClick={() => setModalData(prev => ({...prev, type: 'Folga'}))}
+                      className={`py-3 px-2 rounded-xl font-bold text-[11px] sm:text-xs border-2 transition-all ${
                         modalData.type === 'Folga' 
-                          ? 'border-slate-400 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400' 
-                          : 'border-slate-100 dark:border-slate-800 text-slate-500'
+                          ? 'border-slate-400 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 shadow-sm' 
+                          : 'border-slate-100 dark:border-slate-800 text-slate-500 hover:border-slate-200'
                       }`}
                     >
                       Folga
@@ -1195,28 +1354,35 @@ const CalendarScreen = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Início</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Início</label>
                     <div className="relative">
-                      <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
+                      <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
                       <input 
                         type="time" 
                         value={modalData.start}
-                        onChange={(e) => setModalData({...modalData, start: e.target.value})}
-                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-2 pl-10 pr-3 font-bold text-xs text-slate-800 dark:text-white focus:ring-2 focus:ring-secondary"
+                        onChange={(e) => {
+                          const newStart = e.target.value;
+                          setModalData(prev => ({
+                            ...prev, 
+                            start: newStart,
+                            end: calculateEndTime(newStart, prev.duration)
+                          }));
+                        }}
+                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 pl-10 pr-3 font-bold text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-secondary transition-all"
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Fim</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Fim</label>
                     <div className="relative">
-                      <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
+                      <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
                       <input 
                         type="time" 
                         value={modalData.end}
-                        onChange={(e) => setModalData({...modalData, end: e.target.value})}
-                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-2 pl-10 pr-3 font-bold text-xs text-slate-800 dark:text-white focus:ring-2 focus:ring-secondary"
+                        onChange={(e) => setModalData(prev => ({...prev, end: e.target.value}))}
+                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 pl-10 pr-3 font-bold text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-secondary transition-all"
                       />
                     </div>
                   </div>
@@ -1235,7 +1401,7 @@ const CalendarScreen = ({
                         </div>
                       </div>
                       <button 
-                        onClick={() => setModalData({...modalData, isStartOfScale: !modalData.isStartOfScale})}
+                        onClick={() => setModalData(prev => ({...prev, isStartOfScale: !prev.isStartOfScale}))}
                         className={`w-12 h-6 rounded-full transition-all relative shrink-0 ${modalData.isStartOfScale ? 'bg-secondary' : 'bg-slate-200 dark:bg-slate-700'}`}
                       >
                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${modalData.isStartOfScale ? 'left-7' : 'left-1'}`} />
@@ -1249,21 +1415,29 @@ const CalendarScreen = ({
                     <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Duração</label>
                     <div className="grid grid-cols-2 gap-2">
                       <button 
-                        onClick={() => setModalData({...modalData, duration: '12h'})}
-                        className={`py-2 rounded-xl font-bold text-[11px] border-2 transition-all ${
+                        onClick={() => setModalData(prev => ({
+                          ...prev, 
+                          duration: '12h',
+                          end: calculateEndTime(prev.start, '12h')
+                        }))}
+                        className={`py-3 rounded-xl font-bold text-[11px] sm:text-xs border-2 transition-all ${
                           modalData.duration === '12h' 
-                            ? 'border-warning bg-amber-50 dark:bg-amber-900/20 text-warning dark:text-amber-400' 
-                            : 'border-slate-100 dark:border-slate-800 text-slate-500'
+                            ? 'border-warning bg-amber-50 dark:bg-amber-900/20 text-warning dark:text-amber-400 shadow-sm' 
+                            : 'border-slate-100 dark:border-slate-800 text-slate-500 hover:border-slate-200'
                         }`}
                       >
                         12 Horas
                       </button>
                       <button 
-                        onClick={() => setModalData({...modalData, duration: '24h'})}
-                        className={`py-2 rounded-xl font-bold text-[11px] border-2 transition-all ${
+                        onClick={() => setModalData(prev => ({
+                          ...prev, 
+                          duration: '24h',
+                          end: calculateEndTime(prev.start, '24h')
+                        }))}
+                        className={`py-3 rounded-xl font-bold text-[11px] sm:text-xs border-2 transition-all ${
                           modalData.duration === '24h' 
-                            ? 'border-warning bg-amber-50 dark:bg-amber-900/20 text-warning dark:text-amber-400' 
-                            : 'border-slate-100 dark:border-slate-800 text-slate-500'
+                            ? 'border-warning bg-amber-50 dark:bg-amber-900/20 text-warning dark:text-amber-400 shadow-sm' 
+                            : 'border-slate-100 dark:border-slate-800 text-slate-500 hover:border-slate-200'
                         }`}
                       >
                         24 Horas
@@ -1273,23 +1447,10 @@ const CalendarScreen = ({
                 )}
 
                 {modalData.type !== 'Folga' && (
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cor do Evento</label>
-                    <div className="flex gap-2 px-1 py-1 overflow-x-auto no-scrollbar">
-                      {shiftColors.map((color) => (
-                        <button
-                          key={color.value}
-                          onClick={() => setModalData({...modalData, color: color.value})}
-                          className={`w-8 h-8 rounded-full flex-shrink-0 transition-all ${color.value} ${
-                            modalData.color === color.value 
-                              ? 'ring-2 ring-warning ring-offset-2 scale-110' 
-                              : 'hover:scale-105'
-                          }`}
-                          title={color.name}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                  <ColorPicker 
+                    selectedColor={modalData.color} 
+                    onColorSelect={(color) => setModalData(prev => ({...prev, color}))} 
+                  />
                 )}
 
                 {modalData.type === 'Extra' && (
@@ -1299,8 +1460,8 @@ const CalendarScreen = ({
                       <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-warning" />
                       <select 
                         value={modalData.location}
-                        onChange={(e) => setModalData({...modalData, location: e.target.value})}
-                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-2 pl-10 pr-3 font-bold text-xs text-slate-800 dark:text-white focus:ring-2 focus:ring-warning appearance-none"
+                        onChange={(e) => setModalData(prev => ({...prev, location: e.target.value}))}
+                        className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 pl-10 pr-3 font-bold text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-warning appearance-none"
                       >
                         {extraLocations.length > 0 ? (
                           extraLocations.map(loc => (
@@ -1320,23 +1481,23 @@ const CalendarScreen = ({
                     <FileText size={14} className="absolute left-3 top-3 text-slate-400" />
                     <textarea 
                       value={modalData.info}
-                      onChange={(e) => setModalData({...modalData, info: e.target.value})}
+                      onChange={(e) => setModalData(prev => ({...prev, info: e.target.value}))}
                       placeholder="Ex: Troca de plantão, observações..."
-                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-2 pl-10 pr-3 font-medium text-xs text-slate-800 dark:text-white focus:ring-2 focus:ring-secondary min-h-[80px] resize-none"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl py-3 pl-10 pr-3 font-medium text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-secondary min-h-[100px] resize-none transition-all"
                     />
                   </div>
                 </div>
 
-                  <div className="pt-2 pb-2 flex gap-2">
+                  <div className="pt-4 pb-2 mt-2 flex gap-3">
                     <button 
                       onClick={() => setIsModalOpen(false)}
-                      className="flex-1 py-3 rounded-xl font-bold text-[11px] text-slate-500 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                      className="flex-1 py-4 rounded-xl font-bold text-xs sm:text-sm text-slate-500 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                     >
                       Cancelar
                     </button>
                     <button 
                       onClick={handleSaveChanges}
-                      className="flex-1 py-3 rounded-xl font-bold text-[11px] text-white bg-secondary shadow-lg shadow-secondary/20 dark:shadow-none hover:bg-primary-dark transition-colors"
+                      className="flex-1 py-4 rounded-xl font-bold text-xs sm:text-sm text-white bg-secondary shadow-lg shadow-secondary/20 dark:shadow-none hover:bg-primary-dark transition-all active:scale-[0.98]"
                     >
                       Salvar
                     </button>
@@ -1366,6 +1527,8 @@ const AddShiftScreen = ({
   const [selectedExtraLocation, setSelectedExtraLocation] = useState(extraLocations[0] || '');
   const [selectedColor, setSelectedColor] = useState('bg-secondary');
   const [selectedDuration, setSelectedDuration] = useState<'12h' | '24h'>('12h');
+  const [startTime, setStartTime] = useState('07:00');
+  const [endTime, setEndTime] = useState('19:00');
   const [selectedDay, setSelectedDay] = useState(now.getDate());
   const [currentMonth, setCurrentMonth] = useState(now.getMonth());
   const [currentYear, setCurrentYear] = useState(now.getFullYear());
@@ -1393,21 +1556,6 @@ const AddShiftScreen = ({
     }
   };
 
-  const shiftColors = [
-    { name: 'Laranja', value: 'bg-primary' },
-    { name: 'Azul', value: 'bg-secondary' },
-    { name: 'Amarelo', value: 'bg-warning' },
-    { name: 'Verde', value: 'bg-success' },
-    { name: 'Índigo', value: 'bg-indigo-600' },
-    { name: 'Vermelho', value: 'bg-red-500' },
-    { name: 'Cinza', value: 'bg-slate-500' },
-    { name: 'Esmeralda', value: 'bg-emerald-500' },
-    { name: 'Roxo', value: 'bg-purple-500' },
-    { name: 'Rosa', value: 'bg-pink-500' },
-    { name: 'Ciano', value: 'bg-cyan-500' },
-    { name: 'Preto', value: 'bg-slate-900' },
-  ];
-
   const handleSave = () => {
     const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`;
     setManualShifts(prev => ({
@@ -1416,7 +1564,9 @@ const AddShiftScreen = ({
         type: shiftType,
         color: selectedColor,
         location: shiftType === 'Extra' ? selectedExtraLocation : '',
-        duration: shiftType === 'Extra' ? selectedDuration : null
+        duration: shiftType === 'Extra' ? selectedDuration : null,
+        start: startTime,
+        end: endTime
       }
     }));
     onCancel();
@@ -1476,13 +1626,19 @@ const AddShiftScreen = ({
               <label className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Duração</label>
               <div className="grid grid-cols-2 gap-3">
                 <button 
-                  onClick={() => setSelectedDuration('12h')}
+                  onClick={() => {
+                    setSelectedDuration('12h');
+                    setEndTime(calculateEndTime(startTime, '12h'));
+                  }}
                   className={`py-3 rounded-xl font-bold text-sm border-2 transition-all ${selectedDuration === '12h' ? 'border-warning bg-warning/10 text-warning' : 'border-slate-100 text-slate-500'}`}
                 >
                   12 Horas
                 </button>
                 <button 
-                  onClick={() => setSelectedDuration('24h')}
+                  onClick={() => {
+                    setSelectedDuration('24h');
+                    setEndTime(calculateEndTime(startTime, '24h'));
+                  }}
                   className={`py-3 rounded-xl font-bold text-sm border-2 transition-all ${selectedDuration === '24h' ? 'border-warning bg-warning/10 text-warning' : 'border-slate-100 text-slate-500'}`}
                 >
                   24 Horas
@@ -1497,14 +1653,30 @@ const AddShiftScreen = ({
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Início</label>
             <div className="bg-slate-50 p-4 flex items-center gap-3 rounded-2xl border-b-2 border-slate-200">
               <Clock size={18} className="text-secondary" />
-              <input type="time" defaultValue="07:00" className="bg-transparent border-none p-0 focus:ring-0 font-bold text-slate-800 w-full" />
+              <input 
+                type="time" 
+                value={startTime} 
+                onChange={(e) => {
+                  const newStart = e.target.value;
+                  setStartTime(newStart);
+                  if (shiftType === 'Extra' || true) { // Always calculate for better UX
+                    setEndTime(calculateEndTime(newStart, selectedDuration));
+                  }
+                }}
+                className="bg-transparent border-none p-0 focus:ring-0 font-bold text-slate-800 w-full" 
+              />
             </div>
           </div>
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">Fim</label>
             <div className="bg-slate-50 p-4 flex items-center gap-3 rounded-2xl border-b-2 border-slate-200">
               <Clock size={18} className="text-secondary" />
-              <input type="time" defaultValue="19:00" className="bg-transparent border-none p-0 focus:ring-0 font-bold text-slate-800 w-full" />
+              <input 
+                type="time" 
+                value={endTime} 
+                onChange={(e) => setEndTime(e.target.value)}
+                className="bg-transparent border-none p-0 focus:ring-0 font-bold text-slate-800 w-full" 
+              />
             </div>
           </div>
         </div>
@@ -1539,19 +1711,10 @@ const AddShiftScreen = ({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-1">Cor do Evento</label>
-          <div className="flex gap-4 px-1 py-2 overflow-x-auto no-scrollbar">
-            {shiftColors.map((color) => (
-              <div 
-                key={color.value} 
-                onClick={() => setSelectedColor(color.value)}
-                className={`w-8 h-8 rounded-full flex-shrink-0 ${color.value} ${selectedColor === color.value ? 'ring-2 ring-warning ring-offset-2 scale-110' : ''} cursor-pointer hover:scale-110 transition-transform`}
-                title={color.name}
-              ></div>
-            ))}
-          </div>
-        </div>
+        <ColorPicker 
+          selectedColor={selectedColor} 
+          onColorSelect={(color) => setSelectedColor(color)} 
+        />
       </div>
 
       <div className="fixed bottom-0 left-0 w-full bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 pb-safe z-50">
@@ -2247,7 +2410,7 @@ export default function App() {
           isSyncing={isSyncing}
         />
         
-        <main className="max-w-[1200px] ml-0 md:ml-8 lg:ml-12 px-6 md:px-8 pt-4 md:pt-8">
+        <main className="max-w-[1200px] ml-0 md:ml-8 lg:ml-12 px-6 md:px-8 pt-2 md:pt-4">
           <AnimatePresence mode="wait">
             {renderScreen()}
           </AnimatePresence>
