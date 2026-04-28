@@ -51,6 +51,14 @@ const ProfileScreen = ({
   const [tempNotifyNormal, setTempNotifyNormal] = useState(notificationSettings.notifyNormal);
   const [tempNotifyExtra, setTempNotifyExtra] = useState(notificationSettings.notifyExtra);
 
+  const handleToggleNotification = () => {
+    const newVal = !tempNotifEnabled;
+    setTempNotifEnabled(newVal);
+    if (newVal && 'Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+  };
+
   useEffect(() => {
     setTempWorkplace(workplace);
     setTempExtraLocations(extraLocations);
@@ -346,7 +354,7 @@ const ProfileScreen = ({
                             </div>
                           </div>
                           <button 
-                            onClick={() => setTempNotifEnabled(!tempNotifEnabled)}
+                            onClick={handleToggleNotification}
                             className={`w-12 h-6 rounded-full transition-all relative shrink-0 ${tempNotifEnabled ? 'bg-secondary' : 'bg-slate-300 dark:bg-slate-700'}`}
                           >
                             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${tempNotifEnabled ? 'left-7' : 'left-1'}`} />
@@ -687,7 +695,7 @@ const ProfileScreen = ({
                           </div>
                         </div>
                         <button 
-                          onClick={() => setTempNotifEnabled(!tempNotifEnabled)}
+                          onClick={handleToggleNotification}
                           className={`w-12 h-6 rounded-full transition-all relative shrink-0 ${tempNotifEnabled ? 'bg-secondary' : 'bg-slate-300 dark:bg-slate-700'}`}
                         >
                           <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${tempNotifEnabled ? 'left-7' : 'left-1'}`} />

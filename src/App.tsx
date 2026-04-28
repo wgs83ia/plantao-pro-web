@@ -497,7 +497,7 @@ const SideMenu = ({ isOpen, onClose, onProfile, onAnnual, user }: { isOpen: bool
           </div>
           
           <div className="p-6 bg-slate-50/50 dark:bg-slate-900/50">
-            <div className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border-none">
               {user ? (
                 <>
                   <div className="relative">
@@ -540,7 +540,7 @@ const ColorPicker = ({ selectedColor, onColorSelect }: { selectedColor: string, 
         )}
       </div>
 
-      <div className="relative min-h-[140px] bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl p-3 border border-slate-100 dark:border-slate-800 transition-all group">
+      <div className="relative min-h-[140px] bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl p-3 border-none shadow-sm transition-all group">
         <AnimatePresence mode="wait">
           {!activeGroup ? (
             <motion.div 
@@ -1205,8 +1205,8 @@ const CalendarScreen = ({
                 <ChevronLeft size={28} />
               </button>
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <h3 className="font-headline font-black text-xl md:text-3xl text-slate-900 dark:text-white tracking-tighter uppercase">
-                  {months[currentMonth]} <span className="text-primary">{currentYear}</span>
+                <h3 className="font-headline font-black text-2xl md:text-3xl text-primary tracking-tighter uppercase">
+                  {months[currentMonth]} <span className="text-secondary">{currentYear}</span>
                 </h3>
               </div>
               <button 
@@ -1225,14 +1225,14 @@ const CalendarScreen = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="bg-white dark:bg-slate-900 p-2 md:p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-visible"
+            className="bg-white dark:bg-slate-900 p-1 sm:p-2 md:p-8 rounded-3xl md:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-visible w-full"
           >
             <div className="grid grid-cols-7 text-center mb-4">
               {weekDays.map(d => (
                 <span key={d} className="text-slate-400 dark:text-slate-500 font-black text-[9px] md:text-[11px] uppercase tracking-wider">{d}</span>
               ))}
             </div>
-            <div className="grid grid-cols-7 gap-1 md:gap-3">
+            <div className="grid grid-cols-7 gap-[2px] sm:gap-1 md:gap-3 w-full">
               {emptyDays.map(e => (
                 <div key={`empty-${e}`} className="aspect-square"></div>
               ))}
@@ -1757,7 +1757,7 @@ const AddShiftScreen = ({
 
         <div className="space-y-2">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-1">Data</label>
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border-none">
             <div className="flex justify-between items-center mb-4">
               <span className="font-bold text-slate-900 dark:text-white">{MONTHS[currentMonth]} {currentYear}</span>
               <div className="flex gap-4">
@@ -1872,7 +1872,7 @@ const AnnualView = ({
           const blanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
 
           return (
-            <div key={month} className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800">
+            <div key={month} className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border-none">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">{month}</h3>
                 <span className="text-xs font-bold text-slate-300 dark:text-slate-600">{new Date().getFullYear()}</span>
@@ -1920,7 +1920,7 @@ const AnnualView = ({
         })}
       </section>
 
-      <section className="bg-slate-100 dark:bg-slate-900 p-8 rounded-[2rem] space-y-4 border border-transparent dark:border-slate-800">
+      <section className="bg-slate-50 dark:bg-slate-900/50 p-8 rounded-[2rem] space-y-4 border-none">
         <div>
           <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">Legenda de Escala</h4>
           <p className="text-slate-900 dark:text-white text-sm">Resumo da sua jornada anual em {currentYear}</p>
@@ -1942,11 +1942,11 @@ const AnnualView = ({
       </section>
 
       <section className="grid grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-l-4 border-primary shadow-sm border border-slate-100 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-l-4 border-primary shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
           <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Total de Plantões</p>
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">{allShifts}</h2>
         </div>
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-l-4 border-warning shadow-sm border border-slate-100 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border-l-4 border-warning shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
           <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase mb-1">Horas Totais</p>
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">{totalHours}h</h2>
         </div>
@@ -2086,7 +2086,10 @@ export default function App() {
   const [isGuest, setIsGuest] = useState(true);
   const [normalDayColor, setNormalDayColor] = useState('bg-primary');
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('darkMode');
+    return saved !== null ? saved === 'true' : true;
+  });
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [isSyncing, setIsSyncing] = useState(false);
   const [firestoreLoaded, setFirestoreLoaded] = useState(false);
@@ -2628,7 +2631,7 @@ export default function App() {
           currentScreen={currentScreen}
         />
         
-        <main className="max-w-[1400px] mx-auto px-2 md:px-12 pt-2 md:pt-8 relative z-10">
+        <main className="max-w-[1400px] w-full mx-auto px-1 sm:px-2 md:px-12 pt-2 md:pt-8 relative z-10">
           <AnimatePresence mode="wait">
             {renderScreen()}
           </AnimatePresence>
