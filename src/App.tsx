@@ -355,10 +355,9 @@ const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSy
         <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
           <div className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center">
             <img 
-              src="/logo-plantao.png" 
+              src="/logo-plantao-v2.png" 
               alt="Logo Plantão Pro" 
               className="w-full h-full object-contain contrast-[1.1] brightness-[1.05]"
-              referrerPolicy="no-referrer"
               onClick={() => window.location.reload()}
             />
           </div>
@@ -464,7 +463,7 @@ const SideMenu = ({ isOpen, onClose, onProfile, onAnnual, user }: { isOpen: bool
           <div className="p-8 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/5">
-                <img src="/logo-plantao.png" alt="Logo" className="w-6 h-6 object-contain" />
+                <img src="/logo-plantao-v2.png" alt="Logo" className="w-6 h-6 object-contain" />
               </div>
               <span className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tighter">Plantão Pro</span>
             </div>
@@ -2190,7 +2189,7 @@ export default function App() {
       if (Notification.permission === 'granted') {
         new Notification(title, { 
           body,
-          icon: '/logo-plantao.png'
+          icon: '/logo-plantao-v2.png'
         });
       }
     };
@@ -2604,10 +2603,9 @@ export default function App() {
         {/* Background Logo */}
         <div className="fixed inset-0 pointer-events-none flex items-center justify-center opacity-[0.03] dark:opacity-[0.05] z-0">
           <img 
-            src="/logo-plantao.png" 
+            src="/logo-plantao-v2.png" 
             alt="Logo Background" 
             className="w-[80%] max-w-[500px] object-contain"
-            referrerPolicy="no-referrer"
           />
         </div>
 
