@@ -352,19 +352,16 @@ const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSy
           </button>
         )}
 
-        <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
-          <div className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center">
-            <img 
-              src="/logo-plantao.png" 
-              alt="Logo Plantão Pro" 
-              className="w-full h-full object-contain contrast-[1.1] brightness-[1.05]"
-              referrerPolicy="no-referrer"
-              onClick={() => window.location.reload()}
-            />
-          </div>
-          <div className="flex flex-col">
-            <h1 className="font-headline font-black text-base md:text-2xl tracking-tighter text-slate-900 dark:text-white leading-none">PLANTÃO PRO</h1>
-            <div className="flex items-center gap-1.5 mt-1">
+        <div className="flex items-center gap-2.5 md:gap-3 flex-shrink-0 cursor-pointer group" onClick={() => window.location.reload()}>
+          <img 
+            src="/logo-plantao.png" 
+            alt="Logo Plantão Pro" 
+            className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-md group-hover:scale-105 transition-transform"
+            referrerPolicy="no-referrer"
+          />
+          <div className="flex flex-col justify-center">
+            <h1 className="font-headline font-black text-xl md:text-2xl tracking-tighter text-slate-900 dark:text-white leading-none">PLANTÃO PRO</h1>
+            <div className="flex items-center gap-1.5 mt-0.5">
               {isOffline ? (
                 <div className="flex items-center gap-1">
                   <WifiOff size={10} className="text-red-500" />
@@ -463,8 +460,8 @@ const SideMenu = ({ isOpen, onClose, onProfile, onAnnual, user }: { isOpen: bool
         >
           <div className="p-8 flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shadow-lg shadow-primary/5">
-                <img src="/logo-plantao.png" alt="Logo" className="w-6 h-6 object-contain" />
+              <div className="flex items-center justify-center drop-shadow-md">
+                <img src="/logo-plantao.png" alt="Logo" className="w-9 h-9 object-contain" />
               </div>
               <span className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tighter">Plantão Pro</span>
             </div>
