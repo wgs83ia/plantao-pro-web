@@ -2190,6 +2190,20 @@ export default function App() {
     const saved = localStorage.getItem('extraLocations');
     return saved ? JSON.parse(saved) : ['Setor Alfa', 'Base Operacional'];
   });
+  
+  useEffect(() => {
+    localStorage.setItem('manualShifts', JSON.stringify(manualShifts));
+    localStorage.setItem('darkMode', darkMode ? 'true' : 'false');
+    localStorage.setItem('selectedPattern', selectedPattern);
+    if (anchorDate) localStorage.setItem('anchorDate', anchorDate.toISOString());
+    localStorage.setItem('customWorkDays', customWorkDays.toString());
+    localStorage.setItem('customOffDays', customOffDays.toString());
+    localStorage.setItem('hourlyRate', hourlyRate.toString());
+    localStorage.setItem('workplace', workplace);
+    localStorage.setItem('profession', profession);
+    localStorage.setItem('extraLocations', JSON.stringify(extraLocations));
+    localStorage.setItem('normalDayColor', normalDayColor);
+  }, [manualShifts, darkMode, selectedPattern, anchorDate, customWorkDays, customOffDays, hourlyRate, workplace, profession, extraLocations, normalDayColor]);
   const [selectedShiftForAlert, setSelectedShiftForAlert] = useState<{ date: string, location: string, startTime: string, endTime: string, type: string } | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
