@@ -684,9 +684,17 @@ const CalendarScreen = ({
   const [initialDate] = useState(getInitialNextShiftDate);
 
   const [activeColorGroup, setActiveColorGroup] = useState<string | null>(null);
-  const [currentMonth, setCurrentMonth] = useState(initialDate.getMonth());
-  const [currentYear, setCurrentYear] = useState(initialDate.getFullYear());
-  const [selectedDay, setSelectedDay] = useState<number>(initialDate.getDate());
+  const [currentMonth, setCurrentMonth] = useState(now.getMonth());
+  const [currentYear, setCurrentYear] = useState(now.getFullYear());
+  
+  const getInitialDay = () => {
+    if (initialDate.getMonth() === now.getMonth() && initialDate.getFullYear() === now.getFullYear()) {
+      return initialDate.getDate();
+    }
+    return now.getDate();
+  };
+  
+  const [selectedDay, setSelectedDay] = useState<number>(getInitialDay);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDayOptionsOpen, setIsDayOptionsOpen] = useState(false);
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
@@ -1087,9 +1095,10 @@ const CalendarScreen = ({
             <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] space-y-6 relative overflow-hidden group">
               <div className="absolute top-0 left-0 w-1.5 h-full bg-primary-dark"></div>
               <div className="flex items-center justify-between">
-                <h4 className="font-headline font-black text-xl text-primary tracking-tighter uppercase">Detalhes do Dia</h4>
-                <div className="bg-slate-50 dark:bg-slate-800 text-slate-500 px-4 py-2 rounded-xl text-sm font-black uppercase tracking-widest group-hover:bg-primary/10 group-hover:text-primary transition-all flex items-center gap-1">
-                  <span className="text-lg">{selectedDay}</span> <span>{months[currentMonth].substring(0, 3)}</span>
+                <h4 className="font-headline font-black text-2xl text-primary tracking-tighter uppercase">Detalhes</h4>
+                <div className="bg-primary/10 text-primary px-5 py-2.5 rounded-xl font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-sm shadow-primary/5">
+                  <span className="text-3xl leading-none">{String(selectedDay).padStart(2, '0')}</span> 
+                  <span className="text-lg leading-none">{months[currentMonth].substring(0, 3)}</span>
                 </div>
               </div>
               
@@ -1251,6 +1260,15 @@ const CalendarScreen = ({
               ))}
             </div>
             <div className="grid grid-cols-7 gap-[2px] sm:gap-1 md:gap-3 w-full">
+              {isDayOptionsOpen && (
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDayOptionsOpen(false);
+                  }}
+                />
+              )}
               {emptyDays.map(e => (
                 <div key={`empty-${e}`} className="aspect-square"></div>
               ))}
@@ -1290,11 +1308,23 @@ const CalendarScreen = ({
                       textColor = 'text-slate-900 dark:text-white';
                     }
                     
+                    const colIndex = (firstDayOfMonth + d - 1) % 7;
+                    let popupAlignClass = "left-1/2 -translate-x-1/2";
+                    let arrowAlignClass = "left-1/2 -translate-x-1/2";
+                    
+                    if (colIndex === 0 || colIndex === 1) { // Sunday, Monday
+                      popupAlignClass = "left-0";
+                      arrowAlignClass = "left-[20%]";
+                    } else if (colIndex === 5 || colIndex === 6) { // Friday, Saturday
+                      popupAlignClass = "right-0";
+                      arrowAlignClass = "left-[80%] -translate-x-1/2";
+                    }
+
                     return (
                       <div 
                         key={d} 
-                        onClick={() => handleDayClick(d)}
-                        className={`aspect-square flex flex-col items-center justify-center relative cursor-pointer transition-all hover:opacity-80 rounded-full ${bgColor} ${isSelected ? 'ring-2 ring-secondary ring-offset-2' : ''} ${isToday ? 'ring-2 ring-white dark:ring-slate-900 ring-offset-2 outline outline-2 outline-white dark:outline-slate-700' : ''} ${isExtra ? 'shadow-sm shadow-warning/20' : ''}`}
+                        onClick={(e) => { e.stopPropagation(); handleDayClick(d); }}
+                        className={`aspect-square flex flex-col items-center justify-center relative cursor-pointer transition-all ${!isDayOptionsOpen ? 'lg:hover:opacity-80 active:opacity-60' : ''} rounded-full ${bgColor} ${isSelected ? 'ring-2 ring-secondary ring-offset-2 z-50' : ''} ${isToday ? 'ring-2 ring-white dark:ring-slate-900 ring-offset-2 outline outline-2 outline-white dark:outline-slate-700' : ''} ${isExtra ? 'shadow-sm shadow-warning/20' : ''}`}
                       >
                         {/* Shift Type Indicators */}
                         <div className="absolute top-1 left-1">
@@ -1330,7 +1360,7 @@ const CalendarScreen = ({
                               animate={{ opacity: 1, y: 0, scale: 1 }}
                               exit={{ opacity: 0, y: 5, scale: 0.95 }}
                               onClick={(e) => e.stopPropagation()}
-                              className="absolute bottom-[105%] left-1/2 -translate-x-1/2 z-[100] bg-white/98 dark:bg-slate-900/98 backdrop-blur-md rounded-2xl shadow-[0_10px_30px_-5px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-800/80 p-1.5 flex items-center gap-1.5 min-w-[160px]"
+                              className={`absolute bottom-[105%] ${popupAlignClass} z-[100] bg-white/98 dark:bg-slate-900/98 backdrop-blur-md rounded-2xl shadow-[0_10px_30px_-5px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-800/80 p-1.5 flex items-center gap-1.5 min-w-[160px]`}
                             >
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleEditDay(); }}
@@ -1353,7 +1383,7 @@ const CalendarScreen = ({
                                 <X size={14} />
                                 <span className="text-[8px] font-black mt-0.5 tracking-tighter">FECHAR</span>
                               </button>
-                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[8px] border-transparent border-t-white/98 dark:border-t-slate-900/98"></div>
+                              <div className={`absolute top-full ${arrowAlignClass} border-[8px] border-transparent border-t-white/98 dark:border-t-slate-900/98`}></div>
                             </motion.div>
                           )}
                         </AnimatePresence>
