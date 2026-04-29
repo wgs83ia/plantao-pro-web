@@ -352,16 +352,16 @@ const Header = ({ title, showBack = false, onBack, onMenu, user, isOffline, isSy
           </button>
         )}
 
-        <div className="flex items-center gap-2.5 md:gap-3 flex-shrink-0 cursor-pointer group" onClick={() => window.location.reload()}>
+        <div className="flex items-center gap-2.5 sm:gap-3 lg:gap-4 flex-shrink-0 cursor-pointer group" onClick={() => window.location.reload()}>
           <img 
             src="/logo-plantao.png" 
             alt="Logo Plantão Pro" 
-            className="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-md group-hover:scale-105 transition-transform"
+            className="h-10 sm:h-12 lg:h-16 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform"
             referrerPolicy="no-referrer"
           />
           <div className="flex flex-col justify-center">
-            <h1 className="font-headline font-black text-xl md:text-2xl tracking-tighter text-slate-900 dark:text-white leading-none">PLANTÃO PRO</h1>
-            <div className="flex items-center gap-1.5 mt-0.5">
+            <h1 className="font-headline font-black text-[1.35rem] sm:text-2xl lg:text-3xl tracking-tighter text-slate-900 dark:text-white leading-none">PLANTÃO PRO</h1>
+            <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 sm:mt-1">
               {isOffline ? (
                 <div className="flex items-center gap-1">
                   <WifiOff size={10} className="text-red-500" />
@@ -461,9 +461,9 @@ const SideMenu = ({ isOpen, onClose, onProfile, onAnnual, user }: { isOpen: bool
           <div className="p-8 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center drop-shadow-md">
-                <img src="/logo-plantao.png" alt="Logo" className="w-9 h-9 object-contain" />
+                <img src="/logo-plantao.png" alt="Logo Plantão Pro" className="h-10 w-auto object-contain" />
               </div>
-              <span className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tighter">Plantão Pro</span>
+              <span className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tighter leading-none">PLANTÃO PRO</span>
             </div>
             <button onClick={onClose} className="p-2 text-slate-400 hover:text-secondary bg-slate-50 dark:bg-slate-900 rounded-xl transition-all">
               <X size={20} />
@@ -662,10 +662,31 @@ const CalendarScreen = ({
   setNormalDayColor: (color: string) => void;
 }) => {
   const now = new Date();
+  
+  const getInitialNextShiftDate = () => {
+    for (let i = 0; i < 90; i++) {
+      const checkDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+      const dateKey = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+      
+      const manualShift = manualShifts[dateKey];
+      if (manualShift && (manualShift.type === 'Normal' || manualShift.type === 'Extra')) {
+        return checkDate;
+      }
+      if (!manualShift || manualShift.type !== 'Folga') {
+        if (calculateIsWorkday(checkDate, anchorDate, selectedPattern, customWorkDays, customOffDays)) {
+          return checkDate;
+        }
+      }
+    }
+    return now;
+  };
+
+  const [initialDate] = useState(getInitialNextShiftDate);
+
   const [activeColorGroup, setActiveColorGroup] = useState<string | null>(null);
-  const [currentMonth, setCurrentMonth] = useState(now.getMonth());
-  const [currentYear, setCurrentYear] = useState(now.getFullYear());
-  const [selectedDay, setSelectedDay] = useState<number>(now.getDate());
+  const [currentMonth, setCurrentMonth] = useState(initialDate.getMonth());
+  const [currentYear, setCurrentYear] = useState(initialDate.getFullYear());
+  const [selectedDay, setSelectedDay] = useState<number>(initialDate.getDate());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDayOptionsOpen, setIsDayOptionsOpen] = useState(false);
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
@@ -1066,9 +1087,9 @@ const CalendarScreen = ({
             <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] space-y-6 relative overflow-hidden group">
               <div className="absolute top-0 left-0 w-1.5 h-full bg-primary-dark"></div>
               <div className="flex items-center justify-between">
-                <h4 className="font-headline font-black text-xl text-slate-900 dark:text-white tracking-tighter uppercase">Detalhes</h4>
-                <div className="bg-slate-50 dark:bg-slate-800 text-slate-500 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest group-hover:bg-primary/10 group-hover:text-primary transition-all">
-                  {selectedDay} {months[currentMonth]}
+                <h4 className="font-headline font-black text-xl text-primary tracking-tighter uppercase">Detalhes do Dia</h4>
+                <div className="bg-slate-50 dark:bg-slate-800 text-slate-500 px-4 py-2 rounded-xl text-sm font-black uppercase tracking-widest group-hover:bg-primary/10 group-hover:text-primary transition-all flex items-center gap-1">
+                  <span className="text-lg">{selectedDay}</span> <span>{months[currentMonth].substring(0, 3)}</span>
                 </div>
               </div>
               
